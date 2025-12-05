@@ -682,8 +682,8 @@ int main(void)
     uint8_t speed_hun;
 
 
-    uint8_t speed_rpm[14];
-    uint32_t speed_rpm_count=0;
+    uint8_t speed_rpm[28];
+    int speed_rpm_count=0;
     uint8_t speed_rpm_val=0;
 
     uint32_t fuel_bar=0;
@@ -709,11 +709,62 @@ int main(void)
     //ODO etc off
 
     while (1){
-        SPEED = count%200;
+        if(count%200<30)
+        {
+            speed_rpm_count = count%200 /2;
+             SPEED = 2*(count%200);
+        }else if (count%200<60 )
+        {
+            SPEED = 45+(count%200)/4;
+            speed_rpm_count = 15 - ((count%200)/50);
+
+        }
+        else if (count%200<70 )
+        {
+            SPEED = 60;
+            speed_rpm_count = 13;
+        }
+        else if (count%200<90 )
+        {
+            SPEED = 61;
+            speed_rpm_count = 14;
+        }
+        else if (count%200<100 )
+        {
+            SPEED = 60;
+            speed_rpm_count = 13;
+        }
+
+        else if (count%200<170 )
+         {
+            speed_rpm_count = (count%200)/3-20;
+             SPEED = count%200-40;
+         }
+        else{
+            if(speed_rpm_count>=28)speed_rpm_count=28;
+            if(speed_rpm_count>=0)speed_rpm_count --;
+            SPEED -=4;
+        }
+
+
+
         speed_hun = SPEED/100 %10;
         speed_ten = SPEED/10 %10;
         speed_digit = SPEED %10;
 
+        if(speed_rpm_count>21 && count%2==0)
+        {
+            for(int i =0;i<28;i++)
+            {
+                speed_rpm[i]=0 ;
+            }
+        }else
+        {
+            for(int i =0;i<28;i++)
+            {
+               speed_rpm[i]= speed_rpm_count>=i?1:0;
+            }
+        }
 
 
         speed_hun = NumberToWordTable[(speed_hun==0)?16:1];
@@ -932,24 +983,6 @@ int main(void)
                 LCD_14G = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->G);
         }
 
-        if(count%10==0){//5
-            {
-                speed_rpm_count++;
-                if(speed_rpm_count>=20)speed_rpm_count = 0;
-            }
-        }
-
-        if(speed_rpm_count%20>14 && count%2==0){
-            for(int i =0;i<14;i++)
-                {
-                    speed_rpm[i]= 0 ;
-                }
-        }else{
-             for(int i =0;i<14;i++)
-                {
-                    speed_rpm[i]= speed_rpm_count*14/20>=i?1:0 ;
-                 }
-        }
         if(count%30==0){//5
                 fuel_bar++;
                 fuel_cal = fuel_bar %13;
@@ -1014,33 +1047,33 @@ int main(void)
         }
 
         LCD_A1 = speed_rpm[0];
-        LCD_A2 = speed_rpm[0];
-        LCD_A3 = speed_rpm[1];
-        LCD_A4 = speed_rpm[1];
-        LCD_A5 = speed_rpm[2];
-        LCD_A6 = speed_rpm[2];
-        LCD_A7 = speed_rpm[3];
-        LCD_A8 = speed_rpm[3];
-        LCD_A9 = speed_rpm[4];
-        LCD_A10 = speed_rpm[4];
-        LCD_A11 = speed_rpm[5];
-        LCD_A12 = speed_rpm[5];
-        LCD_A13 = speed_rpm[6];
-        LCD_A14 = speed_rpm[6];
-        LCD_A15 = speed_rpm[7];
-        LCD_A16 = speed_rpm[7];
-        LCD_A17 = speed_rpm[8];
-        LCD_A18 = speed_rpm[8];
-        LCD_A19 = speed_rpm[9];
-        LCD_A20 = speed_rpm[9];
-        LCD_A21 = speed_rpm[10];
-        LCD_A22 = speed_rpm[10];
-        LCD_A23 = speed_rpm[11];
-        LCD_A24 = speed_rpm[11];
-        LCD_A25 = speed_rpm[12];
-        LCD_A26 = speed_rpm[12];
-        LCD_A27 = speed_rpm[13];
-        LCD_A28 = speed_rpm[13];
+        LCD_A2 = speed_rpm[1];
+        LCD_A3 = speed_rpm[2];
+        LCD_A4 = speed_rpm[3];
+        LCD_A5 = speed_rpm[4];
+        LCD_A6 = speed_rpm[5];
+        LCD_A7 = speed_rpm[6];
+        LCD_A8 = speed_rpm[7];
+        LCD_A9 = speed_rpm[8];
+        LCD_A10 = speed_rpm[9];
+        LCD_A11 = speed_rpm[10];
+        LCD_A12 = speed_rpm[11];
+        LCD_A13 = speed_rpm[12];
+        LCD_A14 = speed_rpm[13];
+        LCD_A15 = speed_rpm[14];
+        LCD_A16 = speed_rpm[15];
+        LCD_A17 = speed_rpm[16];
+        LCD_A18 = speed_rpm[17];
+        LCD_A19 = speed_rpm[18];
+        LCD_A20 = speed_rpm[19];
+        LCD_A21 = speed_rpm[20];
+        LCD_A22 = speed_rpm[21];
+        LCD_A23 = speed_rpm[22];
+        LCD_A24 = speed_rpm[23];
+        LCD_A25 = speed_rpm[24];
+        LCD_A26 = speed_rpm[25];
+        LCD_A27 = speed_rpm[26];
+        LCD_A28 = speed_rpm[27];
 
 
 
