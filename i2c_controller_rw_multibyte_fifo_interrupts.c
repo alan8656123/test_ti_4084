@@ -487,7 +487,7 @@ typedef struct
     unsigned Unused : 1;
 } DISPLAY_DIGITAL_TYPE;
 
-const uint8_t NumberToWordTable[18] =
+const uint8_t NumberToWordTable[19] =
 { //   ABCDEFG
     0b01111110 ,//0
     0b00110000 ,//1
@@ -507,6 +507,7 @@ const uint8_t NumberToWordTable[18] =
     0b01000111 ,//F
     0b00000000 ,//Blank
     0b00000001 ,//-
+    0b00110110 ,//N
 };
 
 void delay(uint32_t times){
@@ -695,6 +696,7 @@ int main(void)
     uint8_t min_digit=0;
 
     uint8_t GEAR=0;
+    uint8_t GEAR_num=0;
 
 
     //KM not mph
@@ -707,47 +709,130 @@ int main(void)
 
 
     //ODO etc off
+    const uint8_t anime_loop = 200;
 
     while (1){
-        if(count%200<30)
-        {
-            speed_rpm_count = count%200 /2;
-             SPEED = 2*(count%200);
-        }else if (count%200<60 )
-        {
-            SPEED = 45+(count%200)/4;
-            speed_rpm_count = 15 - ((count%200)/50);
-
-        }
-        else if (count%200<70 )
-        {
-            SPEED = 60;
-            speed_rpm_count = 13;
-        }
-        else if (count%200<90 )
-        {
-            SPEED = 61;
-            speed_rpm_count = 14;
-        }
-        else if (count%200<100 )
-        {
-            SPEED = 60;
-            speed_rpm_count = 13;
+        if(count%anime_loop==0){
+            speed_rpm_count=0;
+            SPEED=0;
+            GEAR = 0;
         }
 
-        else if (count%200<170 )
-         {
-            speed_rpm_count = (count%200)/3-20;
-             SPEED = count%200-40;
-         }
-        else{
-            if(speed_rpm_count>=28)speed_rpm_count=28;
-            if(speed_rpm_count>=0)speed_rpm_count --;
-            SPEED -=4;
+        else if(count%anime_loop<5)
+        {
+            speed_rpm_count+=2;
+             SPEED+=6;
+             GEAR = 1;
+        }
+        else if(count%anime_loop<10)
+        {
+            speed_rpm_count++;
+             SPEED+=3;
+        }
+        else if(count%anime_loop<20)
+        {
+            SPEED++;
+            GEAR = 1;
+        }
+        else if(count%anime_loop<40)
+        {
+            if(count%2==0)
+           SPEED++;
+            if(count%15==0)
+                speed_rpm_count --;
+        }
+        else if(count%anime_loop<45)
+        {
+            speed_rpm_count --;
+            GEAR = 2;
+        }
+        else if(count%anime_loop<50)
+        {
+            if(count%50==0)
+              SPEED--;
+
+        }
+        else if(count%anime_loop<80)
+        {
+            if(count%3==0)
+            {
+                speed_rpm_count++;
+                SPEED+=3;
+            }
+            else{
+                SPEED++;
+            }
+        }
+        else if(count%anime_loop<85)
+        {
+            speed_rpm_count --;
+            GEAR = 3;
+        }
+        else if(count%anime_loop<110)
+        {
+            SPEED ++;
+            if(count%3==0)
+            speed_rpm_count ++;
+
+        }
+        else if(count%anime_loop<115)
+       {
+           speed_rpm_count --;
+       }
+       else if(count%anime_loop<130)
+       {
+           SPEED ++;
+           if(count%3==0)
+                       speed_rpm_count ++;
+       }
+       else if(count%anime_loop<135)
+        {
+            speed_rpm_count --;
+            GEAR = 4;
+        }
+        else if(count%anime_loop<150)
+        {
+            SPEED ++;
+            if(count%3==0)
+                        speed_rpm_count ++;
+        }
+        else if(count%anime_loop<155)
+        {
+           speed_rpm_count --;
+           GEAR = 5;
+        }
+       else if(count%anime_loop<170)
+        {
+           SPEED ++;
+           if(count%3==0)
+                  speed_rpm_count ++;
+        }
+       else if(count%anime_loop<190)
+        {
+         SPEED -=7;
+         speed_rpm_count --;
+         GEAR = 0;
+        }
+       else{
+           speed_rpm_count=-1;
+                       SPEED=0;
+                       GEAR = 18;
         }
 
 
-
+        LCD_7H = 0;
+        if(GEAR ==18)
+        {
+            LCD_7H = 1;
+        }
+        GEAR_num = NumberToWordTable[GEAR];
+       LCD_7A = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->A);
+       LCD_7B = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->B);
+       LCD_7C = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->C);
+       LCD_7D = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->D);
+       LCD_7E = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->E);
+       LCD_7F = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->F);
+       LCD_7G = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->G);
         speed_hun = SPEED/100 %10;
         speed_ten = SPEED/10 %10;
         speed_digit = SPEED %10;
@@ -800,146 +885,49 @@ int main(void)
 
 
 
-        if((count%200)==0)
-        {
-            switch((count/200)%9){
-            case 0:
-                LCD_X35=1;
-                LCD_X32=0;
-                LCD_X34=0;
-                LCD_X33=0;
-                LCD_X31=0;
-                LCD_X30=0;
-                LCD_X29=0;
-                LCD_X28=0;
-                LCD_X27=0;
-                LCD_X29=0;
+        LCD_X35=1;
+        LCD_X32=0;
+        LCD_X34=0;
+        LCD_X33=0;
+        LCD_X31=0;
+        LCD_X30=0;
+        LCD_X29=0;
+        LCD_X28=0;
+        LCD_X27=0;
+        LCD_X29=0;
 
-                break;
-            case 1:
-                LCD_X35=0;
-                LCD_X32=1;
-                LCD_X34=0;
-                LCD_X33=0;
-                LCD_X31=0;
-                LCD_X30=0;
-                LCD_X29=0;
-                LCD_X28=0;
-                LCD_X27=0;
-                LCD_X29=0;
-                break;
-            case 2:
-                LCD_X35=0;
-                LCD_X32=0;
-                LCD_X34=1;
-                LCD_X33=0;
-                LCD_X31=0;
-                LCD_X30=0;
-                LCD_X29=0;
-                LCD_X28=0;
-                LCD_X27=0;
-                LCD_X29=0;
-                break;
-            case 3:
-                LCD_X35=0;
-                LCD_X32=0;
-                LCD_X34=0;
-                LCD_X33=1;
-                LCD_X31=0;
-                LCD_X30=0;
-                LCD_X29=0;
-                LCD_X28=0;
-                LCD_X27=0;
-                LCD_X29=0;
-                break;
-            case 4:
-                LCD_X35=0;
-                LCD_X32=0;
-                LCD_X34=0;
-                LCD_X33=0;
-                LCD_X31=1;
-                LCD_X30=1;
-                LCD_X29=0;
-                LCD_X28=0;
-                LCD_X27=0;
-                LCD_X29=0;
-                break;
-            case 5:
-                LCD_X35=0;
-                LCD_X32=0;
-                LCD_X34=0;
-                LCD_X33=0;
-                LCD_X31=0;
-                LCD_X30=0;
-                LCD_X29=1;
-                LCD_X28=0;
-                LCD_X27=0;
-                LCD_X29=0;
-                break;
-            case 6:
-                LCD_X35=0;
-                LCD_X32=0;
-                LCD_X34=0;
-                LCD_X33=0;
-                LCD_X31=0;
-                LCD_X30=0;
-                LCD_X29=0;
-                LCD_X28=1;
-                LCD_X27=0;
-                LCD_X29=0;
-                break;
-            case 7:
-                LCD_X35=0;
-                LCD_X32=0;
-                LCD_X34=0;
-                LCD_X33=0;
-                LCD_X31=0;
-                LCD_X30=0;
-                LCD_X29=0;
-                LCD_X28=0;
-                LCD_X27=1;
-                LCD_X29=0;
-                break;
-            case 8:
-                LCD_X35=0;
-                LCD_X32=0;
-                LCD_X34=0;
-                LCD_X33=0;
-                LCD_X31=0;
-                LCD_X30=0;
-                LCD_X29=0;
-                LCD_X28=0;
-                LCD_X27=0;
-                LCD_X29=1;
-                break;
-            }
-        }
+
+        display_digit = NumberToWordTable[0];
+        LCD_1A = LCD_2A = LCD_3A = LCD_4A = LCD_5A = LCD_6A = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->A);
+        LCD_1B = LCD_2B = LCD_3B = LCD_4B = LCD_5B = LCD_6B  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->B);
+        LCD_1C = LCD_2C = LCD_3C = LCD_4C = LCD_5C = LCD_6C  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->C);
+        LCD_1D = LCD_2D = LCD_3D = LCD_4D = LCD_5D = LCD_6D  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->D);
+        LCD_1E = LCD_2E = LCD_3E = LCD_4E = LCD_5E = LCD_6E  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->E);
+        LCD_1F = LCD_2F = LCD_3F = LCD_4F = LCD_5F = LCD_6F  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->F);
+        LCD_1G = LCD_2G = LCD_3G = LCD_4G = LCD_5G = LCD_6G  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->G);
+        LCD_DP=1;
+
+
+        display_digit = NumberToWordTable[16];
+        LCD_DP=0;
+
+        LCD_1A = LCD_2A = LCD_3A = LCD_4A = LCD_5A = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->A);
+        LCD_1B = LCD_2B = LCD_3B = LCD_4B = LCD_5B = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->B);
+        LCD_1C = LCD_2C = LCD_3C = LCD_4C = LCD_5C = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->C);
+        LCD_1D = LCD_2D = LCD_3D = LCD_4D = LCD_5D = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->D);
+        LCD_1E = LCD_2E = LCD_3E = LCD_4E = LCD_5E = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->E);
+        LCD_1F = LCD_2F = LCD_3F = LCD_4F = LCD_5F = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->F);
+        LCD_1G = LCD_2G = LCD_3G = LCD_4G = LCD_5G = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->G);
+
+
+
+
+
+
+
 
 
         if(count%20==0){//250sec
-            display_digit = NumberToWordTable[(count/20)%10];
-            LCD_1A = LCD_2A = LCD_3A = LCD_4A = LCD_5A = LCD_6A = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->A);
-            LCD_1B = LCD_2B = LCD_3B = LCD_4B = LCD_5B = LCD_6B  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->B);
-            LCD_1C = LCD_2C = LCD_3C = LCD_4C = LCD_5C = LCD_6C  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->C);
-            LCD_1D = LCD_2D = LCD_3D = LCD_4D = LCD_5D = LCD_6D  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->D);
-            LCD_1E = LCD_2E = LCD_3E = LCD_4E = LCD_5E = LCD_6E  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->E);
-            LCD_1F = LCD_2F = LCD_3F = LCD_4F = LCD_5F = LCD_6F  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->F);
-            LCD_1G = LCD_2G = LCD_3G = LCD_4G = LCD_5G = LCD_6G  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->G);
-            LCD_DP=1;
-
-
-            if((count/20)%10==0){
-                display_digit = NumberToWordTable[16];
-                LCD_DP=0;
-
-                LCD_1A = LCD_2A = LCD_3A = LCD_4A = LCD_5A = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->A);
-                LCD_1B = LCD_2B = LCD_3B = LCD_4B = LCD_5B = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->B);
-                LCD_1C = LCD_2C = LCD_3C = LCD_4C = LCD_5C = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->C);
-                LCD_1D = LCD_2D = LCD_3D = LCD_4D = LCD_5D = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->D);
-                LCD_1E = LCD_2E = LCD_3E = LCD_4E = LCD_5E = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->E);
-                LCD_1F = LCD_2F = LCD_3F = LCD_4F = LCD_5F = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->F);
-                LCD_1G = LCD_2G = LCD_3G = LCD_4G = LCD_5G = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->G);
-            }
 
             uint8_t hourten_temp=(count/20)%3;
             uint8_t hour_digit_temp=(count/20)%10;
@@ -1006,32 +994,7 @@ int main(void)
                 shiftOut(GPIO_dataPin_PORT,GPIO_dataPin_PIN_dataPin_PIN, GPIO_clockPin_PORT,GPIO_clockPin_PIN_clockPin_PIN,  (count%60 ==0)?255:0  );
                 digitalWrite(GPIO_latchPin_PORT,GPIO_latchPin_PIN_latchPin_PIN, 1);
         }
-        if(count%40==0){
 
-            if ((count/40)%6==5){
-                LCD_7H = 1;
-                GEAR = NumberToWordTable[16];
-                LCD_7A = (((DISPLAY_DIGITAL_TYPE *)& GEAR)->A);
-                LCD_7B = (((DISPLAY_DIGITAL_TYPE *)& GEAR)->B);
-                LCD_7C = (((DISPLAY_DIGITAL_TYPE *)& GEAR)->C);
-                LCD_7D = (((DISPLAY_DIGITAL_TYPE *)& GEAR)->D);
-                LCD_7E = (((DISPLAY_DIGITAL_TYPE *)& GEAR)->E);
-                LCD_7F = (((DISPLAY_DIGITAL_TYPE *)& GEAR)->F);
-                LCD_7G = 1;
-            }
-            else
-            {
-                GEAR = NumberToWordTable[((count)/40)%6];
-                LCD_7A = (((DISPLAY_DIGITAL_TYPE *)& GEAR)->A);
-                LCD_7B = (((DISPLAY_DIGITAL_TYPE *)& GEAR)->B);
-                LCD_7C = (((DISPLAY_DIGITAL_TYPE *)& GEAR)->C);
-                LCD_7D = (((DISPLAY_DIGITAL_TYPE *)& GEAR)->D);
-                LCD_7E = (((DISPLAY_DIGITAL_TYPE *)& GEAR)->E);
-                LCD_7F = (((DISPLAY_DIGITAL_TYPE *)& GEAR)->F);
-                LCD_7G = (((DISPLAY_DIGITAL_TYPE *)& GEAR)->G);
-                LCD_7H = 0;
-            }
-        }
         if(count%30==0){
             LCD_X39 = !LCD_X39;
             LCD_X17 = !LCD_X39;
