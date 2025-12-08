@@ -1,6 +1,6 @@
 
-#ifndef SOURCES_LED_MODULE_H_
-#define SOURCES_LED_MODULE_H_
+#ifndef I2C_MODULE_H_
+#define I2C_MODULE_H_
 
 /* Maximum size of TX packet */
 
