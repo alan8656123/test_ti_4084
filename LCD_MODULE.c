@@ -297,7 +297,7 @@ void LCD_demo(void){
         {
             SPEED ++;
             if(count%3==0)
-                        speed_rpm_count ++;
+                        speed_rpm_count +=2;
         }
         else if(count%anime_loop<155)
         {
@@ -308,12 +308,12 @@ void LCD_demo(void){
         {
            SPEED ++;
            if(count%3==0)
-                  speed_rpm_count ++;
+                  speed_rpm_count +=2;
         }
        else if(count%anime_loop<190)
         {
          SPEED -=7;
-         speed_rpm_count --;
+         speed_rpm_count -=2;
          GEAR = 0;
         }
        else{
