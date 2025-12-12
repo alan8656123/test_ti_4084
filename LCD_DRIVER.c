@@ -55,7 +55,7 @@ void send(uint32_t I2C_TX_packet_size)
          ;
 
      /* Add delay between transfers */
-     delay_cycles(1000);
+     delay_cycles(250);
 }
 
 

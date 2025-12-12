@@ -26,6 +26,16 @@ const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
 /**
  * Write custom configuration values to the imported modules.
  */
+const mux4       = system.clockTree["EXHFMUX"];
+mux4.inputSelect = "EXHFMUX_XTAL";
+
+const mux8       = system.clockTree["HSCLKMUX"];
+mux8.inputSelect = "HSCLKMUX_HFCLK";
+
+const pinFunction4     = system.clockTree["HFXT"];
+pinFunction4.inputFreq = 8;
+pinFunction4.enable    = true;
+
 GPIO1.$name                         = "GPIO_LEDS";
 GPIO1.port                          = "PORTA";
 GPIO1.associatedPins[0].$name       = "USER_LED_1";
@@ -94,21 +104,25 @@ I2C1.sclPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
 
 SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.clockTreeEn           = true;
+SYSCTL.powerPolicy           = "STANDBY0";
 
 /**
  * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
  * re-solve from scratch.
  */
-GPIO1.associatedPins[0].pin.$suggestSolution = "PA8";
-Board.peripheral.$suggestSolution            = "DEBUGSS";
-Board.peripheral.swclkPin.$suggestSolution   = "PA20";
-Board.peripheral.swdioPin.$suggestSolution   = "PA19";
-GPIO2.associatedPins[0].pin.$suggestSolution = "PB0";
-GPIO3.associatedPins[0].pin.$suggestSolution = "PB1";
-GPIO4.associatedPins[0].pin.$suggestSolution = "PA9";
-GPIO5.associatedPins[0].pin.$suggestSolution = "PA21";
-GPIO6.associatedPins[0].pin.$suggestSolution = "PB22";
-GPIO7.associatedPins[0].pin.$suggestSolution = "PB21";
-GPIO8.associatedPins[0].pin.$suggestSolution = "PB20";
-GPIO9.associatedPins[0].pin.$suggestSolution = "PA22";
+pinFunction4.peripheral.$suggestSolution           = "SYSCTL";
+pinFunction4.peripheral.hfxInPin.$suggestSolution  = "PA5";
+pinFunction4.peripheral.hfxOutPin.$suggestSolution = "PA6";
+GPIO1.associatedPins[0].pin.$suggestSolution       = "PA8";
+Board.peripheral.$suggestSolution                  = "DEBUGSS";
+Board.peripheral.swclkPin.$suggestSolution         = "PA20";
+Board.peripheral.swdioPin.$suggestSolution         = "PA19";
+GPIO2.associatedPins[0].pin.$suggestSolution       = "PB0";
+GPIO3.associatedPins[0].pin.$suggestSolution       = "PB1";
+GPIO4.associatedPins[0].pin.$suggestSolution       = "PA9";
+GPIO5.associatedPins[0].pin.$suggestSolution       = "PA21";
+GPIO6.associatedPins[0].pin.$suggestSolution       = "PB22";
+GPIO7.associatedPins[0].pin.$suggestSolution       = "PB21";
+GPIO8.associatedPins[0].pin.$suggestSolution       = "PB20";
+GPIO9.associatedPins[0].pin.$suggestSolution       = "PA22";
