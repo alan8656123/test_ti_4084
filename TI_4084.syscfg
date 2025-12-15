@@ -40,8 +40,8 @@ pinFunction4.inputFreq = 8;
 pinFunction4.enable    = true;
 
 const pinFunction6     = system.clockTree["LFXT"];
-pinFunction6.inputFreq = 32;
 pinFunction6.enable    = true;
+pinFunction6.inputFreq = 32.768;
 
 GPIO1.$name                         = "GPIO_LEDS";
 GPIO1.port                          = "PORTA";
