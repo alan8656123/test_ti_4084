@@ -197,7 +197,19 @@ void LCD_open_anime(void){
     }
 }
 
-
+void LcdManager(void){
+    if(lcdFlag)     //5ms period == 200HZ
+    {
+        lcdFlag = false;
+        DisplaySpeed();
+        DisplayRPM();
+        DisplayFuel();
+        DisplayRTC();
+        DisplayGear();
+        DisplayDigital();
+        LCD_IC_DisplayWrite();
+    }
+}
 
 
 void LCD_demo(void){
@@ -370,10 +382,8 @@ void LCD_demo(void){
             uint8_t hour_digit_temp=(count/20)%10;
             if (hourten_temp ==0)hourten_temp=16;
             if(hourten_temp ==2)hour_digit_temp%=4;
-            hour_ten = NumberToWordTable[hourten_temp];
-            hour_digit = NumberToWordTable[hour_digit_temp];
-            min_ten = NumberToWordTable[(count/20)%6];
-            min_digit = NumberToWordTable[(count/20)%6];
+            
+            
             DisplayRTC();
         }
 
@@ -449,6 +459,11 @@ void DisplayFuel(void){
 }
 
 void DisplayRTC(void){
+    hour_ten = NumberToWordTable[rtcHour/10];
+    hour_digit = NumberToWordTable[rtcHour%10];
+    min_ten = NumberToWordTable[rtcMin/10];
+    min_digit = NumberToWordTable[rtcMin%10];
+
     LCD_11A = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->A);
     LCD_11B = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->B);
     LCD_11C = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->C);

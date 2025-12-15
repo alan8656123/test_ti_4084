@@ -1,4 +1,5 @@
 #include "ti_msp_dl_config.h"
+#include "TIMER_MODULE.h"
 #include "LCD_MODULE.h"
 
 
@@ -14,21 +15,12 @@ int main(void)
     DL_TimerG_startCounter(TIMER_0_INST);
 
     Initial_LCD();
-    LCD_demo();
-}
-
-
-void TIMER_0_INST_IRQHandler(void)
-{
-    static uint32_t timer_count = 0;
-    switch (DL_TimerG_getPendingInterrupt(TIMER_0_INST)) {
-        case DL_TIMER_IIDX_ZERO:
-            timer_count++;
-            if(timer_count%1000 == 0 ){ //5s
-                DL_GPIO_togglePins(GPIO_LEDS_PORT,GPIO_LEDS_USER_LED_1_PIN );
-            }
-            break;
-        default:
-            break;
+    //LCD_demo();
+    LCD_open_anime();  
+    delay(1000);
+    while(1){
+        LcdManager();
+        TimerManager();
     }
 }
+
