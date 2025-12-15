@@ -201,12 +201,10 @@ void LCD_open_anime(void){
 
 
 void LCD_demo(void){
-    uint32_t count = 0;
     LCD_open_anime();  
-//////////////display///////////////////
     delay(1000);
-    DL_GPIO_setPins(GPIO_CLR_PORT, GPIO_CLR_PIN_CLR_PIN);
     
+    //FIX
     //KM not mph
     LCD_X41=1;
     LCD_X42=0;
@@ -214,11 +212,24 @@ void LCD_demo(void){
     LCD_X23=0;
     LCD_X22=1;
     LCD_X21=1;
+    LCD_X35=1;
+    //ODO only
+    LCD_X32=0;
+    LCD_X34=0;
+    LCD_X33=0;
+    LCD_X31=0;
+    LCD_X30=0;
+    LCD_X29=0;
+    LCD_X28=0;
+    LCD_X27=0;
+    LCD_X29=0;
+    DisplayDigital();
 
-    //ODO etc off
+
+    uint32_t count = 0;
     const uint8_t anime_loop = 200;
-
     while (1){
+        //DEMO1. SPEED GEAR RPM animation
         if(count%anime_loop==0){
             speed_rpm_count=0;
             SPEED=0;
@@ -336,6 +347,7 @@ void LCD_demo(void){
         speed_hun = SPEED/100 %10;
         speed_ten = SPEED/10 %10;
         speed_digit = SPEED %10;
+        DisplaySpeed();
 
         if(speed_rpm_count>21 && count%2==0)
         {
@@ -350,23 +362,7 @@ void LCD_demo(void){
                speed_rpm[i]= speed_rpm_count>=i?1:0;
             }
         }
-
-        DisplaySpeed();
-
-
-        LCD_X35=1;
-        LCD_X32=0;
-        LCD_X34=0;
-        LCD_X33=0;
-        LCD_X31=0;
-        LCD_X30=0;
-        LCD_X29=0;
-        LCD_X28=0;
-        LCD_X27=0;
-        LCD_X29=0;
-
-
-        DisplayDigital();
+        DisplayRPM();
 
         if(count%20==0){//250sec
 
@@ -405,7 +401,6 @@ void LCD_demo(void){
         if(count%40==0){
             LCD_X36 = !LCD_X36;
         }
-        DisplayRPM();
         
         LCD_IC_DisplayWrite();
         delay(50);
