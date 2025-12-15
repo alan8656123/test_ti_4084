@@ -4,7 +4,7 @@
 
 #define millisecond_cycle 32000 
 uint8_t rtcHour=12;
-uint8_t rtcMin=11;
+uint8_t rtcMin=0;
 uint8_t rtcSec=0;
 
 bool lcdFlag =false;
@@ -29,12 +29,14 @@ void TimerManager(void){
         if(++rtcSecCounter>=200 ){ //1s
             rtcSecCounter = 0;
             if(++rtcSec>=60){
-                rtcSec = 0;
-                if(++rtcMin>=60){
+                rtcHour = DL_RTC_getCalendarHoursBinary(RTC);
+                rtcMin = DL_RTC_getCalendarMinutesBinary(RTC);
+                rtcSec = DL_RTC_getCalendarSecondsBinary(RTC);
+                /*if(++rtcMin>=60){
                     if(++rtcHour>=24){
                         rtcHour = 0;
                     }
-                }
+                }*/
             }
         }
     }

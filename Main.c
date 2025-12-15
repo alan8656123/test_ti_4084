@@ -10,9 +10,10 @@ int main(void)
     NVIC_EnableIRQ(I2C_INST_INT_IRQN);
     DL_SYSCTL_disableSleepOnExit();
 
-
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
     DL_TimerG_startCounter(TIMER_0_INST);
+
+    DL_RTC_enableClockControl(RTC);
 
     Initial_LCD();
     //LCD_demo();
