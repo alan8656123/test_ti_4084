@@ -36,7 +36,8 @@ void send(uint32_t I2C_TX_packet_size)
      /* Wait until the Controller sends all bytes */
      while ((gI2cControllerStatus != I2C_STATUS_TX_COMPLETE) &&
             (gI2cControllerStatus != I2C_STATUS_ERROR)) {
-         __WFE();
+                //delay_cycles(10);//make sure long enoungh;
+                __WFE();
      }
 
      while (DL_I2C_getControllerStatus(I2C_INST) &
@@ -55,7 +56,6 @@ void send(uint32_t I2C_TX_packet_size)
          ;
 
      /* Add delay between transfers */
-     delay_cycles(250);
 }
 
 
@@ -63,26 +63,12 @@ void I2C_INST_IRQHandler(void)
 {
     switch (DL_I2C_getPendingInterrupt(I2C_INST)) {
         case DL_I2C_IIDX_CONTROLLER_RX_DONE:
-            gI2cControllerStatus = I2C_STATUS_RX_COMPLETE;
-            break;
         case DL_I2C_IIDX_CONTROLLER_TX_DONE:
             DL_I2C_disableInterrupt(
                 I2C_INST, DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER);
             gI2cControllerStatus = I2C_STATUS_TX_COMPLETE;
             break;
         case DL_I2C_IIDX_CONTROLLER_RXFIFO_TRIGGER:
-            gI2cControllerStatus = I2C_STATUS_RX_INPROGRESS;
-            /* Receive all bytes from target */
-            while (DL_I2C_isControllerRXFIFOEmpty(I2C_INST) != true) {
-                if (gRxCount < gRxLen) {
-                    gRxPacket[gRxCount++] =
-                        DL_I2C_receiveControllerData(I2C_INST);
-                } else {
-                    /* Ignore and remove from FIFO if the buffer is full */
-                    DL_I2C_receiveControllerData(I2C_INST);
-                }
-            }
-            break;
         case DL_I2C_IIDX_CONTROLLER_TXFIFO_TRIGGER:
             gI2cControllerStatus = I2C_STATUS_TX_INPROGRESS;
             /* Fill TX FIFO with next bytes to send */

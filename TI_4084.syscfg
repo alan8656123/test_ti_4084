@@ -22,15 +22,14 @@ const GPIO9  = GPIO.addInstance();
 const I2C    = scripting.addModule("/ti/driverlib/I2C", {}, false);
 const I2C1   = I2C.addInstance();
 const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
+const TIMER  = scripting.addModule("/ti/driverlib/TIMER", {}, false);
+const TIMER1 = TIMER.addInstance();
 
 /**
  * Write custom configuration values to the imported modules.
  */
 const mux4       = system.clockTree["EXHFMUX"];
 mux4.inputSelect = "EXHFMUX_XTAL";
-
-const mux8       = system.clockTree["HSCLKMUX"];
-mux8.inputSelect = "HSCLKMUX_HFCLK";
 
 const pinFunction4     = system.clockTree["HFXT"];
 pinFunction4.inputFreq = 8;
@@ -89,7 +88,7 @@ GPIO9.associatedPins[0].assignedPin  = "22";
 I2C1.$name                             = "I2C";
 I2C1.basicEnableController             = true;
 I2C1.advAnalogGlitchFilter             = "DISABLED";
-I2C1.intController                     = ["ARBITRATION_LOST","NACK","RXFIFO_TRIGGER","RX_DONE","TX_DONE"];
+I2C1.intController                     = ["ARBITRATION_LOST","NACK","TX_DONE"];
 I2C1.peripheral.$assign                = "I2C1";
 I2C1.peripheral.sdaPin.$assign         = "PB3";
 I2C1.peripheral.sclPin.$assign         = "PB2";
@@ -105,6 +104,14 @@ I2C1.sclPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
 SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.clockTreeEn           = true;
 SYSCTL.powerPolicy           = "STANDBY0";
+
+TIMER1.$name              = "TIMER_0";
+TIMER1.timerMode          = "PERIODIC";
+TIMER1.timerClkDiv        = 5;
+TIMER1.timerClkPrescale   = 32;
+TIMER1.timerPeriod        = "5ms";
+TIMER1.interrupts         = ["ZERO"];
+TIMER1.peripheral.$assign = "TIMG0";
 
 /**
  * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future
