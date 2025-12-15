@@ -48,10 +48,12 @@ uint8_t SPEED=0;
 uint8_t speed_digit;
 uint8_t speed_ten;
 uint8_t speed_hun;
+void DisplaySpeed(void);
+
 uint8_t speed_rpm[28];
 int speed_rpm_count=0;
 uint8_t speed_rpm_val=0;
-void DisplaySpeed(void);
+void DisplayRPM(void);
 
 uint32_t fuel_bar=0;
 uint8_t fuel_cal=0;
@@ -62,6 +64,13 @@ uint8_t hour_digit=2;
 uint8_t min_ten=0;
 uint8_t min_digit=0;
 void DisplayRTC(void);
+
+uint8_t GEAR=0;
+uint8_t GEAR_num=0;
+void DisplayGear(void);
+
+//todo
+void DisplayDigital(void);
 
 
 void Initial_LCD(void){
@@ -193,19 +202,11 @@ void LCD_open_anime(void){
 
 void LCD_demo(void){
     uint32_t count = 0;
-
     LCD_open_anime();  
 //////////////display///////////////////
     delay(1000);
-
-
     DL_GPIO_setPins(GPIO_CLR_PORT, GPIO_CLR_PIN_CLR_PIN);
     
-
-    uint8_t GEAR=0;
-    uint8_t GEAR_num=0;
-
-
     //KM not mph
     LCD_X41=1;
     LCD_X42=0;
@@ -213,7 +214,6 @@ void LCD_demo(void){
     LCD_X23=0;
     LCD_X22=1;
     LCD_X21=1;
-
 
     //ODO etc off
     const uint8_t anime_loop = 200;
@@ -326,20 +326,13 @@ void LCD_demo(void){
                        GEAR = 18;
         }
 
-
         LCD_7H = 0;
         if(GEAR ==18)
         {
             LCD_7H = 1;
         }
-        GEAR_num = NumberToWordTable[GEAR];
-       LCD_7A = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->A);
-       LCD_7B = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->B);
-       LCD_7C = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->C);
-       LCD_7D = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->D);
-       LCD_7E = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->E);
-       LCD_7F = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->F);
-       LCD_7G = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->G);
+        DisplayGear();
+      
         speed_hun = SPEED/100 %10;
         speed_ten = SPEED/10 %10;
         speed_digit = SPEED %10;
@@ -373,29 +366,7 @@ void LCD_demo(void){
         LCD_X29=0;
 
 
-        display_digit = NumberToWordTable[0];
-        LCD_1A = LCD_2A = LCD_3A = LCD_4A = LCD_5A = LCD_6A = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->A);
-        LCD_1B = LCD_2B = LCD_3B = LCD_4B = LCD_5B = LCD_6B  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->B);
-        LCD_1C = LCD_2C = LCD_3C = LCD_4C = LCD_5C = LCD_6C  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->C);
-        LCD_1D = LCD_2D = LCD_3D = LCD_4D = LCD_5D = LCD_6D  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->D);
-        LCD_1E = LCD_2E = LCD_3E = LCD_4E = LCD_5E = LCD_6E  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->E);
-        LCD_1F = LCD_2F = LCD_3F = LCD_4F = LCD_5F = LCD_6F  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->F);
-        LCD_1G = LCD_2G = LCD_3G = LCD_4G = LCD_5G = LCD_6G  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->G);
-        LCD_DP=1;
-
-
-        display_digit = NumberToWordTable[16];
-        LCD_DP=0;
-
-        LCD_1A = LCD_2A = LCD_3A = LCD_4A = LCD_5A = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->A);
-        LCD_1B = LCD_2B = LCD_3B = LCD_4B = LCD_5B = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->B);
-        LCD_1C = LCD_2C = LCD_3C = LCD_4C = LCD_5C = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->C);
-        LCD_1D = LCD_2D = LCD_3D = LCD_4D = LCD_5D = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->D);
-        LCD_1E = LCD_2E = LCD_3E = LCD_4E = LCD_5E = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->E);
-        LCD_1F = LCD_2F = LCD_3F = LCD_4F = LCD_5F = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->F);
-        LCD_1G = LCD_2G = LCD_3G = LCD_4G = LCD_5G = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->G);
-
-
+        DisplayDigital();
 
         if(count%20==0){//250sec
 
@@ -407,8 +378,6 @@ void LCD_demo(void){
             hour_digit = NumberToWordTable[hour_digit_temp];
             min_ten = NumberToWordTable[(count/20)%6];
             min_digit = NumberToWordTable[(count/20)%6];
-            
-
             DisplayRTC();
         }
 
@@ -418,7 +387,6 @@ void LCD_demo(void){
                 if(fuel_cal>=7)fuel_cal=12-fuel_cal;
 
                 DisplayFuel();
-
                 digitalWrite(GPIO_latchPin_PORT,GPIO_latchPin_PIN_latchPin_PIN, 0);
                 shiftOut(GPIO_dataPin_PORT,GPIO_dataPin_PIN_dataPin_PIN, GPIO_clockPin_PORT,GPIO_clockPin_PIN_clockPin_PIN,  (count%60 ==0)?255:0  );
                 digitalWrite(GPIO_latchPin_PORT,GPIO_latchPin_PIN_latchPin_PIN, 1);
@@ -437,43 +405,11 @@ void LCD_demo(void){
         if(count%40==0){
             LCD_X36 = !LCD_X36;
         }
-
-        LCD_A1 = speed_rpm[0];
-        LCD_A2 = speed_rpm[1];
-        LCD_A3 = speed_rpm[2];
-        LCD_A4 = speed_rpm[3];
-        LCD_A5 = speed_rpm[4];
-        LCD_A6 = speed_rpm[5];
-        LCD_A7 = speed_rpm[6];
-        LCD_A8 = speed_rpm[7];
-        LCD_A9 = speed_rpm[8];
-        LCD_A10 = speed_rpm[9];
-        LCD_A11 = speed_rpm[10];
-        LCD_A12 = speed_rpm[11];
-        LCD_A13 = speed_rpm[12];
-        LCD_A14 = speed_rpm[13];
-        LCD_A15 = speed_rpm[14];
-        LCD_A16 = speed_rpm[15];
-        LCD_A17 = speed_rpm[16];
-        LCD_A18 = speed_rpm[17];
-        LCD_A19 = speed_rpm[18];
-        LCD_A20 = speed_rpm[19];
-        LCD_A21 = speed_rpm[20];
-        LCD_A22 = speed_rpm[21];
-        LCD_A23 = speed_rpm[22];
-        LCD_A24 = speed_rpm[23];
-        LCD_A25 = speed_rpm[24];
-        LCD_A26 = speed_rpm[25];
-        LCD_A27 = speed_rpm[26];
-        LCD_A28 = speed_rpm[27];
-
-
-
-
+        DisplayRPM();
+        
         LCD_IC_DisplayWrite();
         delay(50);
         count++;
-    
     }
 }
 
@@ -549,4 +485,68 @@ void DisplayRTC(void){
     LCD_14E = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->E);
     LCD_14F = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->F);
     LCD_14G = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->G);
+}
+void DisplayGear(void){
+    GEAR_num = NumberToWordTable[GEAR];
+    LCD_7A = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->A);
+    LCD_7B = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->B);
+    LCD_7C = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->C);
+    LCD_7D = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->D);
+    LCD_7E = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->E);
+    LCD_7F = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->F);
+    LCD_7G = (((DISPLAY_DIGITAL_TYPE *)& GEAR_num)->G);
+}
+
+void DisplayRPM(){
+    LCD_A1 = speed_rpm[0];
+    LCD_A2 = speed_rpm[1];
+    LCD_A3 = speed_rpm[2];
+    LCD_A4 = speed_rpm[3];
+    LCD_A5 = speed_rpm[4];
+    LCD_A6 = speed_rpm[5];
+    LCD_A7 = speed_rpm[6];
+    LCD_A8 = speed_rpm[7];
+    LCD_A9 = speed_rpm[8];
+    LCD_A10 = speed_rpm[9];
+    LCD_A11 = speed_rpm[10];
+    LCD_A12 = speed_rpm[11];
+    LCD_A13 = speed_rpm[12];
+    LCD_A14 = speed_rpm[13];
+    LCD_A15 = speed_rpm[14];
+    LCD_A16 = speed_rpm[15];
+    LCD_A17 = speed_rpm[16];
+    LCD_A18 = speed_rpm[17];
+    LCD_A19 = speed_rpm[18];
+    LCD_A20 = speed_rpm[19];
+    LCD_A21 = speed_rpm[20];
+    LCD_A22 = speed_rpm[21];
+    LCD_A23 = speed_rpm[22];
+    LCD_A24 = speed_rpm[23];
+    LCD_A25 = speed_rpm[24];
+    LCD_A26 = speed_rpm[25];
+    LCD_A27 = speed_rpm[26];
+    LCD_A28 = speed_rpm[27];
+}
+
+//todo!!!!!!!!!!!!!!
+void DisplayDigital(void){
+    display_digit = NumberToWordTable[0];
+    LCD_1A = LCD_2A = LCD_3A = LCD_4A = LCD_5A = LCD_6A = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->A);
+    LCD_1B = LCD_2B = LCD_3B = LCD_4B = LCD_5B = LCD_6B  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->B);
+    LCD_1C = LCD_2C = LCD_3C = LCD_4C = LCD_5C = LCD_6C  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->C);
+    LCD_1D = LCD_2D = LCD_3D = LCD_4D = LCD_5D = LCD_6D  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->D);
+    LCD_1E = LCD_2E = LCD_3E = LCD_4E = LCD_5E = LCD_6E  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->E);
+    LCD_1F = LCD_2F = LCD_3F = LCD_4F = LCD_5F = LCD_6F  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->F);
+    LCD_1G = LCD_2G = LCD_3G = LCD_4G = LCD_5G = LCD_6G  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->G);
+    LCD_DP=1;
+
+    display_digit = NumberToWordTable[16];
+    LCD_DP=0;
+    LCD_1A = LCD_2A = LCD_3A = LCD_4A = LCD_5A = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->A);
+    LCD_1B = LCD_2B = LCD_3B = LCD_4B = LCD_5B = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->B);
+    LCD_1C = LCD_2C = LCD_3C = LCD_4C = LCD_5C = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->C);
+    LCD_1D = LCD_2D = LCD_3D = LCD_4D = LCD_5D = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->D);
+    LCD_1E = LCD_2E = LCD_3E = LCD_4E = LCD_5E = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->E);
+    LCD_1F = LCD_2F = LCD_3F = LCD_4F = LCD_5F = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->F);
+    LCD_1G = LCD_2G = LCD_3G = LCD_4G = LCD_5G = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->G);
 }
