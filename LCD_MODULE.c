@@ -42,6 +42,28 @@ const uint8_t NumberToWordTable[19] =
     0b00110110 ,//N
 };
 
+uint8_t display_digit;
+
+uint8_t SPEED=0;
+uint8_t speed_digit;
+uint8_t speed_ten;
+uint8_t speed_hun;
+uint8_t speed_rpm[28];
+int speed_rpm_count=0;
+uint8_t speed_rpm_val=0;
+void DisplaySpeed(void);
+
+uint32_t fuel_bar=0;
+uint8_t fuel_cal=0;
+void DisplayFuel(void);
+
+uint8_t hour_ten=1;
+uint8_t hour_digit=2;
+uint8_t min_ten=0;
+uint8_t min_digit=0;
+void DisplayRTC(void);
+
+
 void Initial_LCD(void){
     // open////////////////////////////////////////////////
     delay(200);
@@ -178,25 +200,7 @@ void LCD_demo(void){
 
 
     DL_GPIO_setPins(GPIO_CLR_PORT, GPIO_CLR_PIN_CLR_PIN);
-    uint8_t display_digit;
-
-    uint8_t SPEED=0;
-    uint8_t speed_digit;
-    uint8_t speed_ten;
-    uint8_t speed_hun;
-
-
-    uint8_t speed_rpm[28];
-    int speed_rpm_count=0;
-    uint8_t speed_rpm_val=0;
-
-    uint32_t fuel_bar=0;
-    uint8_t fuel_cal=0;
-
-    uint8_t hour_ten=1;
-    uint8_t hour_digit=2;
-    uint8_t min_ten=0;
-    uint8_t min_digit=0;
+    
 
     uint8_t GEAR=0;
     uint8_t GEAR_num=0;
@@ -354,38 +358,7 @@ void LCD_demo(void){
             }
         }
 
-
-        speed_hun = NumberToWordTable[(speed_hun==0)?16:1];
-        speed_ten = NumberToWordTable[(speed_ten==0&&speed_hun==0)?16:speed_ten];
-        speed_digit = NumberToWordTable[speed_digit];
-
-
-        LCD_8A = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->A);
-        LCD_8B = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->B);
-        LCD_8C = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->C);
-        LCD_8D = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->D);
-        LCD_8E = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->E);
-        //LCD_8F = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->F);
-        LCD_8G = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->G);
-
-
-        LCD_9A = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->A);
-        LCD_9B = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->B);
-        LCD_9C = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->C);
-        LCD_9D = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->D);
-        LCD_9E = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->E);
-        LCD_9F = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->F);
-        LCD_9G = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->G);
-
-
-        LCD_10A = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->A);
-        LCD_10B = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->B);
-        LCD_10C = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->C);
-        LCD_10D = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->D);
-        LCD_10E = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->E);
-        LCD_10F = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->F);
-        LCD_10G = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->G);
-
+        DisplaySpeed();
 
 
         LCD_X35=1;
@@ -424,74 +397,27 @@ void LCD_demo(void){
 
 
 
-
-
-
-
-
-
         if(count%20==0){//250sec
 
             uint8_t hourten_temp=(count/20)%3;
             uint8_t hour_digit_temp=(count/20)%10;
             if (hourten_temp ==0)hourten_temp=16;
             if(hourten_temp ==2)hour_digit_temp%=4;
+            hour_ten = NumberToWordTable[hourten_temp];
+            hour_digit = NumberToWordTable[hour_digit_temp];
+            min_ten = NumberToWordTable[(count/20)%6];
+            min_digit = NumberToWordTable[(count/20)%6];
+            
 
-                hour_ten = NumberToWordTable[hourten_temp];
-                LCD_11A = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->A);
-                LCD_11B = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->B);
-                LCD_11C = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->C);
-                LCD_11D = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->D);
-                LCD_11E = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->E);
-                //LCD_8F = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->F);
-                LCD_11G = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->G);
-
-                hour_digit = NumberToWordTable[hour_digit_temp];
-                LCD_12A = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->A);
-                LCD_12B = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->B);
-                LCD_12C = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->C);
-                LCD_12D = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->D);
-                LCD_12E = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->E);
-                LCD_12F = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->F);
-                LCD_12G = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->G);
-
-                min_ten = NumberToWordTable[(count/20)%6];
-                LCD_13A = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->A);
-                LCD_13B = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->B);
-                LCD_13C = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->C);
-                LCD_13D = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->D);
-                LCD_13E = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->E);
-                LCD_13F = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->F);
-                LCD_13G = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->G);
-
-                min_digit = NumberToWordTable[(count/20)%6];
-                LCD_14A = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->A);
-                LCD_14B = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->B);
-                LCD_14C = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->C);
-                LCD_14D = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->D);
-                LCD_14E = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->E);
-                LCD_14F = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->F);
-                LCD_14G = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->G);
+            DisplayRTC();
         }
 
         if(count%30==0){//5
                 fuel_bar++;
                 fuel_cal = fuel_bar %13;
-
                 if(fuel_cal>=7)fuel_cal=12-fuel_cal;
-                /*if(fuel_cal==7)fuel_cal=5;
-                if(fuel_cal==8)fuel_cal=4;
-                if(fuel_cal==9)fuel_cal=3;
-                if(fuel_cal==10)fuel_cal=2;
-                if(fuel_cal==11)fuel_cal=1;
-                if(fuel_cal==12)fuel_cal=0;*/
 
-                LCD_X7 = fuel_cal%7<=5;
-                LCD_X8 = fuel_cal%7<=4;
-                LCD_X9 = fuel_cal%7<=3;
-                LCD_X10 = fuel_cal%7<=2;
-                LCD_X11 = fuel_cal%7<=1;
-                LCD_X12 = fuel_cal%7<=0;
+                DisplayFuel();
 
                 digitalWrite(GPIO_latchPin_PORT,GPIO_latchPin_PIN_latchPin_PIN, 0);
                 shiftOut(GPIO_dataPin_PORT,GPIO_dataPin_PIN_dataPin_PIN, GPIO_clockPin_PORT,GPIO_clockPin_PIN_clockPin_PIN,  (count%60 ==0)?255:0  );
@@ -549,4 +475,78 @@ void LCD_demo(void){
         count++;
     
     }
+}
+
+void DisplaySpeed(void){
+    speed_hun = NumberToWordTable[(speed_hun==0)?16:1];
+    speed_ten = NumberToWordTable[(speed_ten==0&&speed_hun==0)?16:speed_ten];
+    speed_digit = NumberToWordTable[speed_digit];
+
+    LCD_8A = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->A);
+    LCD_8B = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->B);
+    LCD_8C = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->C);
+    LCD_8D = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->D);
+    LCD_8E = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->E);
+    //LCD_8F = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->F);
+    LCD_8G = (((DISPLAY_DIGITAL_TYPE *)&speed_hun)->G);
+
+
+    LCD_9A = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->A);
+    LCD_9B = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->B);
+    LCD_9C = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->C);
+    LCD_9D = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->D);
+    LCD_9E = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->E);
+    LCD_9F = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->F);
+    LCD_9G = (((DISPLAY_DIGITAL_TYPE *)&speed_ten)->G);
+
+
+    LCD_10A = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->A);
+    LCD_10B = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->B);
+    LCD_10C = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->C);
+    LCD_10D = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->D);
+    LCD_10E = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->E);
+    LCD_10F = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->F);
+    LCD_10G = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->G);
+}
+void DisplayFuel(void){
+    LCD_X7 = fuel_cal%7<=5;
+    LCD_X8 = fuel_cal%7<=4;
+    LCD_X9 = fuel_cal%7<=3;
+    LCD_X10 = fuel_cal%7<=2;
+    LCD_X11 = fuel_cal%7<=1;
+    LCD_X12 = fuel_cal%7<=0;
+}
+
+void DisplayRTC(void){
+    LCD_11A = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->A);
+    LCD_11B = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->B);
+    LCD_11C = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->C);
+    LCD_11D = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->D);
+    LCD_11E = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->E);
+    //LCD_8F = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->F);
+    LCD_11G = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->G);
+
+    LCD_12A = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->A);
+    LCD_12B = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->B);
+    LCD_12C = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->C);
+    LCD_12D = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->D);
+    LCD_12E = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->E);
+    LCD_12F = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->F);
+    LCD_12G = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->G);
+
+    LCD_13A = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->A);
+    LCD_13B = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->B);
+    LCD_13C = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->C);
+    LCD_13D = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->D);
+    LCD_13E = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->E);
+    LCD_13F = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->F);
+    LCD_13G = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->G);
+
+    LCD_14A = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->A);
+    LCD_14B = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->B);
+    LCD_14C = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->C);
+    LCD_14D = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->D);
+    LCD_14E = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->E);
+    LCD_14F = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->F);
+    LCD_14G = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->G);
 }
