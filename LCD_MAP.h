@@ -265,7 +265,11 @@
 #define     LCD_6D               (((struct LCD_Type *) &Lcd_Data[38])->bit5)
 #define     LCD_6A              (((struct LCD_Type *) &Lcd_Data[38])->bit4)
 
-
-
+#define DIST_ODO LCD_X35
+#define DIST_TRIP LCD_X35
+#define DIST_DP LCD_DP
+#define DIST_KM LCD_X22
+#define DIST_VOLT LCD_X33
+#define DIST_OIL LCD_X34
 
 #endif

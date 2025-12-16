@@ -20,7 +20,6 @@ int main(void)
 
     Initial_LCD();
     InitialLed();
-    //LCD_demo();
     LCD_open_anime();  
     delay(1000);
     while(1){

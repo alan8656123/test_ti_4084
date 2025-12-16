@@ -10,10 +10,12 @@ extern uint8_t rtcHour;
 extern uint8_t rtcMin;
 //rtcSec only use in timer
 
-
+//LCD
 extern bool lcdFlag;
 
-extern bool buttonFlag;
+//BUTTON
+extern bool BUTTON_CYCLE_FLAG;
 //uint8_t buttonCounter = 0;
+extern bool SET_CLOCK_MODE;
 
 #endif

@@ -1,4 +1,3 @@
-
 #include "ti_msp_dl_config.h"
 #include "string.h"
 #include "Uci8533.h"
@@ -6,48 +5,21 @@
 #include "LED_MODULE.h"
 #include "TIMER_MODULE.h"
 #include "LCD_MODULE.h"
+#include "BUTTON_MODULE.h"
+#include "TYPEDEF.h"
 
-typedef struct
-{
-    unsigned G : 1;
-    unsigned F : 1;
-    unsigned E : 1;
-    unsigned D : 1;
-    unsigned C : 1;
-    unsigned B : 1;
-    unsigned A : 1;
-    unsigned Unused : 1;
-} DISPLAY_DIGITAL_TYPE;
-
-const uint8_t NumberToWordTable[19] =
-{ //   ABCDEFG
-    0b01111110 ,//0
-    0b00110000 ,//1
-    0b01101101 ,//2
-    0b01111001 ,//3
-    0b00110011 ,//4
-    0b01011011 ,//5
-    0b01011111 ,//6
-    0b01110000 ,//7
-    0b01111111 ,//8
-    0b01111011 ,//9
-    0b01110111 ,//A
-    0b00011111 ,//b
-    0b00001101 ,//c
-    0b00111101 ,//d
-    0b01001111 ,//E
-    0b01000111 ,//F
-    0b00000000 ,//Blank
-    0b00000001 ,//-
-    0b00110110 ,//N
-};
+static union GLB DISPLAY0,DISPLAY1,DISPLAY2,DISPLAY3,DISPLAY4,DISPLAY5,DISPLAY6;
+union LONG32 TRIPKM, TRIPMPH;
+union LONG32 ODOKM, ODOMPH;
+union LONG32 SERVICEKM, SERVICEMPH;
+uint32_t RealBatBuf = 130U;
 
 uint8_t display_digit;
 
 uint8_t SPEED=0;
-uint8_t speed_digit;
-uint8_t speed_ten;
-uint8_t speed_hun;
+uint8_t speed_digit=0;
+uint8_t speed_ten=0;
+uint8_t speed_hun=0;
 void DisplaySpeed(void);
 
 uint8_t speed_rpm[28];
@@ -72,9 +44,11 @@ void DisplayGear(void);
 //todo
 void DisplayDigital(void);
 
+void ProcessDistToDisplay();
+
 
 void Initial_LCD(void){
-    // open////////////////////////////////////////////////
+    //delay to prevent i2c not up to 3.3V
     delay(200);
     LCD_IC_DisplayOn();
     // all light////////////////////////////////////////////////
@@ -201,6 +175,7 @@ void LcdManager(void){
     if(lcdFlag)     //5ms period == 200HZ
     {
         lcdFlag = false;
+        ProcessDistToDisplay();
         DisplaySpeed();
         DisplayRPM();
         DisplayFuel();
@@ -208,213 +183,6 @@ void LcdManager(void){
         DisplayGear();
         DisplayDigital();
         LCD_IC_DisplayWrite();
-    }
-}
-
-
-void LCD_demo(void){
-    LCD_open_anime();  
-    delay(1000);
-    
-    //FIX
-    //KM not mph
-    LCD_X41=1;
-    LCD_X42=0;
-    LCD_X24=0;
-    LCD_X23=0;
-    LCD_X22=1;
-    LCD_X21=1;
-    LCD_X35=1;
-    //ODO only
-    LCD_X32=0;
-    LCD_X34=0;
-    LCD_X33=0;
-    LCD_X31=0;
-    LCD_X30=0;
-    LCD_X29=0;
-    LCD_X28=0;
-    LCD_X27=0;
-    LCD_X29=0;
-    DisplayDigital();
-
-
-    uint32_t count = 0;
-    const uint8_t anime_loop = 200;
-    while (1){
-        //DEMO1. SPEED GEAR RPM animation
-        if(count%anime_loop==0){
-            speed_rpm_count=0;
-            SPEED=0;
-            GEAR = 0;
-        }
-
-        else if(count%anime_loop<5)
-        {
-            speed_rpm_count+=2;
-             SPEED+=6;
-             GEAR = 1;
-        }
-        else if(count%anime_loop<10)
-        {
-            speed_rpm_count++;
-             SPEED+=3;
-        }
-        else if(count%anime_loop<20)
-        {
-            SPEED++;
-            GEAR = 1;
-        }
-        else if(count%anime_loop<40)
-        {
-            if(count%2==0)
-           SPEED++;
-            if(count%15==0)
-                speed_rpm_count --;
-        }
-        else if(count%anime_loop<45)
-        {
-            speed_rpm_count --;
-            GEAR = 2;
-        }
-        else if(count%anime_loop<50)
-        {
-            if(count%50==0)
-              SPEED--;
-
-        }
-        else if(count%anime_loop<80)
-        {
-            if(count%3==0)
-            {
-                speed_rpm_count++;
-                SPEED+=3;
-            }
-            else{
-                SPEED++;
-            }
-        }
-        else if(count%anime_loop<85)
-        {
-            speed_rpm_count --;
-            GEAR = 3;
-        }
-        else if(count%anime_loop<110)
-        {
-            SPEED ++;
-            if(count%3==0)
-            speed_rpm_count ++;
-
-        }
-        else if(count%anime_loop<115)
-       {
-           speed_rpm_count --;
-       }
-       else if(count%anime_loop<130)
-       {
-           SPEED ++;
-           if(count%3==0)
-                       speed_rpm_count ++;
-       }
-       else if(count%anime_loop<135)
-        {
-            speed_rpm_count --;
-            GEAR = 4;
-        }
-        else if(count%anime_loop<150)
-        {
-            SPEED ++;
-            if(count%3==0)
-                        speed_rpm_count +=2;
-        }
-        else if(count%anime_loop<155)
-        {
-           speed_rpm_count --;
-           GEAR = 5;
-        }
-       else if(count%anime_loop<170)
-        {
-           SPEED ++;
-           if(count%3==0)
-                  speed_rpm_count +=2;
-        }
-       else if(count%anime_loop<190)
-        {
-         SPEED -=7;
-         speed_rpm_count -=2;
-         GEAR = 0;
-        }
-       else{
-           speed_rpm_count=-1;
-                       SPEED=0;
-                       GEAR = 18;
-        }
-
-        LCD_7H = 0;
-        if(GEAR ==18)
-        {
-            LCD_7H = 1;
-        }
-        DisplayGear();
-      
-        speed_hun = SPEED/100 %10;
-        speed_ten = SPEED/10 %10;
-        speed_digit = SPEED %10;
-        DisplaySpeed();
-
-        if(speed_rpm_count>21 && count%2==0)
-        {
-            for(int i =0;i<28;i++)
-            {
-                speed_rpm[i]=0 ;
-            }
-        }else
-        {
-            for(int i =0;i<28;i++)
-            {
-               speed_rpm[i]= speed_rpm_count>=i?1:0;
-            }
-        }
-        DisplayRPM();
-
-        if(count%20==0){//250sec
-
-            uint8_t hourten_temp=(count/20)%3;
-            uint8_t hour_digit_temp=(count/20)%10;
-            if (hourten_temp ==0)hourten_temp=16;
-            if(hourten_temp ==2)hour_digit_temp%=4;
-            
-            
-            DisplayRTC();
-        }
-
-        if(count%30==0){//5
-                fuel_bar++;
-                fuel_cal = fuel_bar %13;
-                if(fuel_cal>=7)fuel_cal=12-fuel_cal;
-
-                DisplayFuel();
-                digitalWrite(GPIO_latchPin_PORT,GPIO_latchPin_PIN_latchPin_PIN, 0);
-                shiftOut(GPIO_dataPin_PORT,GPIO_dataPin_PIN_dataPin_PIN, GPIO_clockPin_PORT,GPIO_clockPin_PIN_clockPin_PIN,  (count%60 ==0)?255:0  );
-                digitalWrite(GPIO_latchPin_PORT,GPIO_latchPin_PIN_latchPin_PIN, 1);
-        }
-
-        if(count%30==0){
-            LCD_X39 = !LCD_X39;
-            LCD_X17 = !LCD_X39;
-            LCD_X15 = LCD_X39;
-        }
-        if(count%50==0){
-            LCD_X38 = !LCD_X38;
-            LCD_X37 = !LCD_X38;
-            LCD_X16 = LCD_X38;
-        }
-        if(count%40==0){
-            LCD_X36 = !LCD_X36;
-        }
-        
-        LCD_IC_DisplayWrite();
-        delay(50);
-        count++;
     }
 }
 
@@ -538,25 +306,177 @@ void DisplayRPM(){
     LCD_A28 = speed_rpm[27];
 }
 
-//todo!!!!!!!!!!!!!!
-void DisplayDigital(void){
-    display_digit = NumberToWordTable[0];
-    LCD_1A = LCD_2A = LCD_3A = LCD_4A = LCD_5A = LCD_6A = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->A);
-    LCD_1B = LCD_2B = LCD_3B = LCD_4B = LCD_5B = LCD_6B  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->B);
-    LCD_1C = LCD_2C = LCD_3C = LCD_4C = LCD_5C = LCD_6C  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->C);
-    LCD_1D = LCD_2D = LCD_3D = LCD_4D = LCD_5D = LCD_6D  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->D);
-    LCD_1E = LCD_2E = LCD_3E = LCD_4E = LCD_5E = LCD_6E  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->E);
-    LCD_1F = LCD_2F = LCD_3F = LCD_4F = LCD_5F = LCD_6F  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->F);
-    LCD_1G = LCD_2G = LCD_3G = LCD_4G = LCD_5G = LCD_6G  = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->G);
-    LCD_DP=1;
+void ProcessDistToDisplay(void)
+{
+    union LONG32 DIST_BUF;
 
-    display_digit = NumberToWordTable[16];
-    LCD_DP=0;
-    LCD_1A = LCD_2A = LCD_3A = LCD_4A = LCD_5A = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->A);
-    LCD_1B = LCD_2B = LCD_3B = LCD_4B = LCD_5B = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->B);
-    LCD_1C = LCD_2C = LCD_3C = LCD_4C = LCD_5C = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->C);
-    LCD_1D = LCD_2D = LCD_3D = LCD_4D = LCD_5D = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->D);
-    LCD_1E = LCD_2E = LCD_3E = LCD_4E = LCD_5E = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->E);
-    LCD_1F = LCD_2F = LCD_3F = LCD_4F = LCD_5F = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->F);
-    LCD_1G = LCD_2G = LCD_3G = LCD_4G = LCD_5G = (((DISPLAY_DIGITAL_TYPE *)&display_digit)->G);
+    // 0:ODO  1:TRIP  2:POINT  3:KM  4:X  5:X  6:VOLT  7: Oil service
+    if (ButtonMode == MODE_ODO) // ODO MODE
+    {
+        if (MarketMode == MILE)
+        {
+            DIST_BUF.vGLB = ODOMPH.vGLB;
+            DISPLAY6.vGLB = BIT0 + BIT4; // 0:ODO  1:TRIP  2:POINT  3:KM  4:X  5:X  6:VOLT  7: Oil service
+        }
+        else
+        {
+            DIST_BUF.vGLB = ODOKM.vGLB;
+            DISPLAY6.vGLB = BIT0 + BIT3;
+        }
+
+        DISPLAY5.vGLB = (uint16_t)(DIST_BUF.vGLB / 1000000);
+        DISPLAY4.vGLB = (uint16_t)((DIST_BUF.vGLB % 1000000) / 100000);
+        DISPLAY3.vGLB = (uint16_t)((DIST_BUF.vGLB % 100000) / 10000);
+        DISPLAY2.vGLB = (uint16_t)((DIST_BUF.vGLB % 10000) / 1000);
+        DISPLAY1.vGLB = (uint16_t)((DIST_BUF.vGLB % 1000) / 100);
+        DISPLAY0.vGLB = (uint16_t)((DIST_BUF.vGLB % 100) / 10);
+    }
+    else if (ButtonMode == MODE_TRIP) // TRIP MODE
+    {
+        if (MarketMode == MILE)
+        {
+            DIST_BUF.vGLB = TRIPMPH.vGLB;
+            DISPLAY6.vGLB = BIT1 + BIT2 + BIT4; // 0:ODO  1:TRIP  2:POINT  3:KM  4:X  5:X  6:VOLT  7: Oil service
+        }
+        else
+        {
+            DIST_BUF.vGLB = TRIPKM.vGLB;
+            DISPLAY6.vGLB = BIT1 + BIT2 + BIT3;
+        }
+
+        DISPLAY5.vGLB = 0;
+        DISPLAY4.vGLB = 0;
+        DISPLAY3.vGLB = (uint16_t)((DIST_BUF.vGLB % 10000) / 1000);
+        DISPLAY2.vGLB = (uint16_t)((DIST_BUF.vGLB % 1000) / 100);
+        DISPLAY1.vGLB = (uint16_t)((DIST_BUF.vGLB % 100) / 10);
+        DISPLAY0.vGLB = (uint16_t)(DIST_BUF.vGLB % 10);
+    }
+    else if (ButtonMode == MODE_SERVICE) // SERVICE MODE
+    {
+        if (MarketMode == MILE)
+        {
+            DIST_BUF.vGLB = SERVICEMPH.vGLB;
+            DISPLAY6.vGLB = BIT2 + BIT4 + BIT7; // 0:ODO  1:TRIP  2:POINT  3:KM  4:X  5:X  6:VOLT  7: Oil service
+        }
+        else
+        {
+            DIST_BUF.vGLB = SERVICEKM.vGLB;
+            DISPLAY6.vGLB = BIT2 + BIT3 + BIT7;
+        }
+
+        DISPLAY5.vGLB = 0;
+        DISPLAY4.vGLB = (uint16_t)((DIST_BUF.vGLB % 100000) / 10000);
+        DISPLAY3.vGLB = (uint16_t)((DIST_BUF.vGLB % 10000) / 1000);
+        DISPLAY2.vGLB = (uint16_t)((DIST_BUF.vGLB % 1000) / 100);
+        DISPLAY1.vGLB = (uint16_t)((DIST_BUF.vGLB % 100) / 10);
+        DISPLAY0.vGLB = (uint16_t)(DIST_BUF.vGLB % 10);
+    }
+    else if (ButtonMode == MODE_VOLT) // VOLT MODE
+    {
+        DISPLAY6.vGLB = BIT2 + BIT6; // 0:ODO  1:TRIP  2:POINT  3:KM  4:X  5:X  6:VOLT  7: Oil service
+
+        DISPLAY5.vGLB = 0;
+        DISPLAY4.vGLB = 0;
+        DISPLAY3.vGLB = 0;
+        DISPLAY2.vGLB = (uint16_t)((RealBatBuf % 10000) / 1000);
+        DISPLAY1.vGLB = (uint16_t)((RealBatBuf % 1000) / 100);
+        DISPLAY0.vGLB = (uint16_t)((RealBatBuf % 100) / 10);
+    }
+
+    if (DISPLAY5.vGLB == 0x00)
+    {
+        DISPLAY5.vGLB = 16;
+        if (DISPLAY4.vGLB == 0x00)
+        {
+            DISPLAY4.vGLB = 16;
+            if (DISPLAY3.vGLB == 0x00)
+            {
+                DISPLAY3.vGLB = 16;
+                if (DISPLAY2.vGLB == 0x00)
+                {
+                    DISPLAY2.vGLB = 16;
+                    if (ButtonMode == MODE_ODO)
+                    {
+                        if (DISPLAY1.vGLB == 0x00)
+                            DISPLAY1.vGLB = 16;//OFF
+                    }
+                }
+            }
+        }
+    }
+
+    DISPLAY5.vGLB = NumberAndWordTable[DISPLAY5.vGLB];
+    DISPLAY4.vGLB = NumberAndWordTable[DISPLAY4.vGLB];
+    DISPLAY3.vGLB = NumberAndWordTable[DISPLAY3.vGLB];
+    DISPLAY2.vGLB = NumberAndWordTable[DISPLAY2.vGLB];
+    DISPLAY1.vGLB = NumberAndWordTable[DISPLAY1.vGLB];
+    DISPLAY0.vGLB = NumberAndWordTable[DISPLAY0.vGLB];
+}
+
+void DisplayDigital(void){
+    //tempary off
+    LCD_X32=0;
+    LCD_X34=0;
+    LCD_X33=0;
+    LCD_X31=0;
+    LCD_X30=0;
+    LCD_X29=0;
+    LCD_X28=0;
+    LCD_X27=0;
+    LCD_X29=0;
+
+    DIST_ODO = DISPLAY6.bits.bit0;
+    DIST_TRIP = DISPLAY6.bits.bit1;
+    DIST_DP = DISPLAY6.bits.bit2;
+    DIST_KM = DISPLAY6.bits.bit3;
+    DIST_VOLT = DISPLAY6.bits.bit6;
+    DIST_OIL = DISPLAY6.bits.bit7;
+
+    LCD_1A = DISPLAY5.bits.bit6;
+    LCD_1B = DISPLAY5.bits.bit5;
+    LCD_1C = DISPLAY5.bits.bit4;
+    LCD_1D = DISPLAY5.bits.bit3;
+    LCD_1E = DISPLAY5.bits.bit2;
+    LCD_1F = DISPLAY5.bits.bit1;
+    LCD_1G = DISPLAY5.bits.bit0;
+
+    LCD_2A = DISPLAY4.bits.bit6;
+    LCD_2B = DISPLAY4.bits.bit5;
+    LCD_2C = DISPLAY4.bits.bit4;
+    LCD_2D = DISPLAY4.bits.bit3;
+    LCD_2E = DISPLAY4.bits.bit2;
+    LCD_2F = DISPLAY4.bits.bit1;
+    LCD_2G = DISPLAY4.bits.bit0;
+
+    LCD_3A = DISPLAY3.bits.bit6;
+    LCD_3B = DISPLAY3.bits.bit5;
+    LCD_3C = DISPLAY3.bits.bit4;
+    LCD_3D = DISPLAY3.bits.bit3;
+    LCD_3E = DISPLAY3.bits.bit2;
+    LCD_3F = DISPLAY3.bits.bit1;
+    LCD_3G = DISPLAY3.bits.bit0;
+
+    LCD_4A = DISPLAY2.bits.bit6;
+    LCD_4B = DISPLAY2.bits.bit5;
+    LCD_4C = DISPLAY2.bits.bit4;
+    LCD_4D = DISPLAY2.bits.bit3;
+    LCD_4E = DISPLAY2.bits.bit2;
+    LCD_4F = DISPLAY2.bits.bit1;
+    LCD_4G = DISPLAY2.bits.bit0;
+
+    LCD_5A = DISPLAY1.bits.bit6;
+    LCD_5B = DISPLAY1.bits.bit5;
+    LCD_5C = DISPLAY1.bits.bit4;
+    LCD_5D = DISPLAY1.bits.bit3;
+    LCD_5E = DISPLAY1.bits.bit2;
+    LCD_5F = DISPLAY1.bits.bit1;
+    LCD_5G = DISPLAY1.bits.bit0;
+
+    LCD_6A = DISPLAY0.bits.bit6;
+    LCD_6B = DISPLAY0.bits.bit5;
+    LCD_6C = DISPLAY0.bits.bit4;
+    LCD_6D = DISPLAY0.bits.bit3;
+    LCD_6E = DISPLAY0.bits.bit2;
+    LCD_6F = DISPLAY0.bits.bit1;
+    LCD_6G = DISPLAY0.bits.bit0;
 }

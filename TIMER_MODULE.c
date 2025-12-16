@@ -2,16 +2,19 @@
 #include "TIMER_MODULE.h"
 
 #define millisecond_cycle 32000 
-
+//CLOCK
 uint8_t rtcHour=12;
 uint8_t rtcMin=0;
 uint8_t rtcSec=0;
 uint32_t rtcSecCounter = 0;
 
+//LCD
 bool lcdFlag =false;
 
-bool buttonFlag =false;
+//BUTTON
+bool BUTTON_CYCLE_FLAG =false;
 uint8_t buttonCounter = 0;
+bool SET_CLOCK_MODE = 0;
 
 void delay(uint32_t times){
     delay_cycles(times*millisecond_cycle);
@@ -38,7 +41,7 @@ void TimerManager(void){
 
         if(++buttonCounter>=4){
             buttonCounter = 0;
-            buttonFlag = true;
+            BUTTON_CYCLE_FLAG = true;
         }
     }
 }
