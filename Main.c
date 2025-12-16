@@ -1,6 +1,9 @@
 #include "ti_msp_dl_config.h"
 #include "TIMER_MODULE.h"
+#include "LED_MODULE.h"
 #include "LCD_MODULE.h"
+#include "BUTTON_MODULE.h"
+
 
 
 int main(void)
@@ -16,12 +19,14 @@ int main(void)
     DL_RTC_enableClockControl(RTC);
 
     Initial_LCD();
+    InitialLed();
     //LCD_demo();
     LCD_open_anime();  
     delay(1000);
     while(1){
         LcdManager();
         TimerManager();
+        ButtonManager();
     }
 }
 

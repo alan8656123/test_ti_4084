@@ -5,6 +5,6 @@ void LCD_demo(void);
 void Initial_LCD(void);
 void LcdManager(void);
 void LCD_open_anime(void);  
-
+void LedShiftController(uint8_t value);
 
 #endif

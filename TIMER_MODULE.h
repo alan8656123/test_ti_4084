@@ -13,4 +13,7 @@ extern uint8_t rtcMin;
 
 extern bool lcdFlag;
 
+extern bool buttonFlag;
+//uint8_t buttonCounter = 0;
+
 #endif
