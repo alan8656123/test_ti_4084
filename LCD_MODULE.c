@@ -6,7 +6,21 @@
 #include "TIMER_MODULE.h"
 #include "LCD_MODULE.h"
 #include "BUTTON_MODULE.h"
+#include "SPEED_MODULE.h"
 #include "TYPEDEF.h"
+
+enum {
+    DISPLAY_TIME,
+    DISPLAY_SPEED,
+    DISPLAY_DIST,
+    DISPLAY_TURNSIGNAL,
+    DISPLAY_FUEL,
+    DISPLAY_OTHER,
+    DISPLAY_END,
+};
+static uint8_t SwithDisplayFlag = 0;
+
+
 
 static union GLB DISPLAY0,DISPLAY1,DISPLAY2,DISPLAY3,DISPLAY4,DISPLAY5,DISPLAY6;
 union LONG32 TRIPKM, TRIPMPH;
@@ -20,6 +34,7 @@ uint8_t SPEED=0;
 uint8_t speed_digit=0;
 uint8_t speed_ten=0;
 uint8_t speed_hun=0;
+void ProcessSpeedToDisplay(void);
 void DisplaySpeed(void);
 
 uint8_t speed_rpm[28];
@@ -175,21 +190,118 @@ void LCD_open_anime(void){
 void LcdManager(void){
     if(lcdFlag)     //5ms period == 200HZ
     {
-        lcdFlag = false;
-        ProcessDistToDisplay();
-        DisplaySpeed();
-        DisplayRPM();
-        DisplayFuel();
-        ProcessTimeToDisplay();
-        DisplayRTC();
-        DisplayGear();
-        DisplayDigital();
+            lcdFlag = false;
+            if (SwithDisplayFlag == DISPLAY_TIME)
+           {
+                ProcessTimeToDisplay();
+                DisplayRTC();
+           }
+           else if (SwithDisplayFlag == DISPLAY_SPEED)
+           {
+                ProcessSpeedToDisplay();
+                DisplaySpeed();
+           }
+           else if (SwithDisplayFlag == DISPLAY_DIST)
+           {
+                ProcessDistToDisplay();
+                DisplayDigital();
+           }
+           else if (SwithDisplayFlag == DISPLAY_TURNSIGNAL)
+           {   
+                DisplaySpeed();
+                DisplayRPM();
+                DisplayGear();
+           }
+           else if (SwithDisplayFlag == DISPLAY_FUEL)
+           {
+                DisplayFuel();
+           }
+           else if (SwithDisplayFlag == DISPLAY_OTHER)
+           {
+           }
+        if (++SwithDisplayFlag >= DISPLAY_END)
+               SwithDisplayFlag = 0x00;
         LCD_IC_DisplayWrite();
     }
 }
 
+void ProcessSpeedToDisplay(void)
+{
+    uint16_t TempSpeedBuf;
+
+    if (MarketMode == MILE)
+    {
+        TempSpeedBuf = DispSpeedMphBuf;
+        DISPLAY3.vGLB = BIT1;
+    }
+    else
+    {
+        TempSpeedBuf = DispSpeedKmhBuf;
+        DISPLAY3.vGLB = BIT0;
+    }
+
+    if (TempSpeedBuf >= 199)
+    {
+        TempSpeedBuf = 199;
+    }
+
+    DISPLAY2.vGLB = TempSpeedBuf / 100;
+    DISPLAY1.vGLB = (TempSpeedBuf % 100) / 10;
+    DISPLAY0.vGLB = TempSpeedBuf % 10;
+
+    if (DISPLAY2.vGLB == 0x00)
+    {
+        DISPLAY2.vGLB = 16;
+        if (DISPLAY1.vGLB == 0x00)
+        {
+            DISPLAY1.vGLB = 16;
+        }
+    }
+
+    if (TempSpeedBuf >= 199)
+    {
+        if (Flash500msFlag == 0)
+        {
+            DISPLAY2.vGLB = 16;
+            DISPLAY1.vGLB = 16;
+            DISPLAY0.vGLB = 16;
+        }
+    }
+
+    DISPLAY2.vGLB = NumberAndWordTable[DISPLAY2.vGLB];
+    DISPLAY1.vGLB = NumberAndWordTable[DISPLAY1.vGLB];
+    DISPLAY0.vGLB = NumberAndWordTable[DISPLAY0.vGLB];
+}
+
 void DisplaySpeed(void){
-    speed_hun = NumberToWordTable[(speed_hun==0)?16:1];
+
+    //SPEED_KMH = DISPLAY3.bits.bit0; // KM
+    //SPEED_KMH = DISPLAY3.bits.bit0; // KM
+
+    LCD_8A = DISPLAY2.bits.bit6; // DIG.6
+    LCD_8B = DISPLAY2.bits.bit5;
+    LCD_8C = DISPLAY2.bits.bit4;
+    LCD_8D = DISPLAY2.bits.bit3;
+    LCD_8E = DISPLAY2.bits.bit2;
+    //LCD_8F = DISPLAY2.bits.bit1;
+    LCD_8G = DISPLAY2.bits.bit0;
+
+    LCD_9A = DISPLAY1.bits.bit6; // DIG.6
+    LCD_9B = DISPLAY1.bits.bit5;
+    LCD_9C = DISPLAY1.bits.bit4;
+    LCD_9D = DISPLAY1.bits.bit3;
+    LCD_9E = DISPLAY1.bits.bit2;
+    LCD_9F = DISPLAY1.bits.bit1;
+    LCD_9G = DISPLAY1.bits.bit0;
+
+    LCD_10A = DISPLAY0.bits.bit6; // DIG.7
+    LCD_10B = DISPLAY0.bits.bit5;
+    LCD_10C = DISPLAY0.bits.bit4;
+    LCD_10D = DISPLAY0.bits.bit3;
+    LCD_10E = DISPLAY0.bits.bit2;
+    LCD_10F = DISPLAY0.bits.bit1;
+    LCD_10G = DISPLAY0.bits.bit0;
+    /*speed_hun = NumberToWordTable[(speed_hun==0)?16:1];
     speed_ten = NumberToWordTable[(speed_ten==0&&speed_hun==0)?16:speed_ten];
     speed_digit = NumberToWordTable[speed_digit];
 
@@ -217,7 +329,7 @@ void DisplaySpeed(void){
     LCD_10D = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->D);
     LCD_10E = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->E);
     LCD_10F = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->F);
-    LCD_10G = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->G);
+    LCD_10G = (((DISPLAY_DIGITAL_TYPE *)&speed_digit)->G);*/
 }
 void DisplayFuel(void){
     LCD_X7 = fuel_cal%7<=5;
