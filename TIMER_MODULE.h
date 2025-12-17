@@ -8,10 +8,12 @@ void TimerManager(void);
 volatile bool timerFlag;
 extern uint8_t rtcHour;
 extern uint8_t rtcMin;
-//rtcSec only use in timer
+extern uint8_t rtcSec;
+extern uint8_t HourBuf, MinBuf;
 
 //LCD
 extern bool lcdFlag;
+extern bool Flash500msFlag;
 
 //BUTTON
 extern bool BUTTON_CYCLE_FLAG;

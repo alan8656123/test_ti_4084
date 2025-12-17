@@ -1,6 +1,6 @@
 #include "ti_msp_dl_config.h"
 #include "BUTTON_MODULE.h"
-#include "LED_MODULE.h"
+#include "SPEED_MODULE.h"
 #include "TIMER_MODULE.h"
 #include "TYPEDEF.h"
 
@@ -155,7 +155,7 @@ void CheckButtonStatus(void){
 void ProcessButtonAction(void){
     if (SET_CLOCK_MODE) 
     {
-        /*if (RealSpeedKmhBuf <= 10)
+        if (RealSpeedKmhBuf <= 10)
         {
             if (MODE_RELEASE_FLAG > 0U) // MODE BUTTON short press
             {
@@ -174,7 +174,7 @@ void ProcessButtonAction(void){
             MODE_PRESS_FLAG = 0;
             FUNC_PRESS_FLAG = 0;
             ExitSetTimeMode();
-        }*/
+        }
     }
     //Button MODE
     else if (BUTTON_CYCLE_FLAG) // 20ms
@@ -274,18 +274,92 @@ void Button_Mode_Shortpress(void) {
 }
 
 void Button_Func_Shortpress(void) {
-
+    //temp test
     rtcMin ++;
 }
 
 
 void Button_Func_Longpress(void) {
-    rtcHour=0;
-
+    if (SET_CLOCK_MODE)
+    {
+        SET_CLOCK_MODE = 0U;
+        ExitSetTimeMode();
+    }
+    else
+    {
+        if ((SET_CLOCK_MODE == 0) && (ButtonMode == MODE_ODO) && (DispSpeedKmhBuf <= 10))
+        {
+            SET_CLOCK_MODE = 1; // enter Time Mode
+            Button5sCnt = 0;
+            HourBuf = rtcHour;
+            MinBuf = rtcMin;
+        }
+        else if (ButtonMode == MODE_TRIP)
+        {
+            // initialize ODO & TRIP variables
+            /*TRIPKM.vGLB = 0;
+            TRIPMPH.vGLB = 0;
+            TripKmhBuf = 0;
+            TripMphBuf = 0;
+            DistCompTripKmhCnt = 100;
+            DistCompTripMphCnt = 100;
+            WriteFlag = 0xff;*/
+        }
+        else if (ButtonMode == MODE_SERVICE)
+        {
+            // initialize SERVICE variables
+            /*SERVICEKM.vGLB = 0;
+            SERVICEMPH.vGLB = 0;
+            SerKmhBuf = 0;
+            SerMphBuf = 0;
+            DistCompSerKmhCnt = 100;
+            DistCompSerMphCnt = 100;
+            SERVICE_LED = 0;
+            WriteFlag = 0xff;*/
+        }
+    }
 }
 
 void ExitSetTimeMode(void)
 {
-    rtcHour=12;
-    rtcMin=12;
+    TimeMode = 0;
+    rtcHour = HourBuf;
+    rtcMin = MinBuf;
+    rtcSec = 0;
+
+    DL_RTC_setCalendarHoursBinary(RTC,rtcHour);
+    DL_RTC_setCalendarMinutesBinary(RTC,rtcMin);
+    DL_RTC_setCalendarSecondsBinary(RTC,rtcSec);
+}
+
+void Clock_Mode_ShortPress() {
+    Button5sCnt = 0;
+    if (++TimeMode >= EOF_TIME_MODE)
+    {
+        TimeMode = 0;
+    }
+}
+
+void Clock_Func_ShortPress() {
+
+    static uint8_t SetMinTen = 0U;
+    static uint8_t SetMinUnit = 0U;
+
+    if (TimeMode == TIME_HOUR)
+    {
+        if (++HourBuf >= 24)
+            HourBuf = 0;
+    }
+    else if (TimeMode == TIME_MIN_TEN)
+    {
+        if (++SetMinTen >= 6)
+            SetMinTen = 0;
+        MinBuf = (SetMinTen * 10) + (MinBuf % 10);
+    }
+    else if (TimeMode == TIME_MIN_UNIT)
+    {
+        if (++SetMinUnit >= 10)
+            SetMinUnit = 0;
+        MinBuf = (MinBuf / 10) * 10 + SetMinUnit;
+    }
 }

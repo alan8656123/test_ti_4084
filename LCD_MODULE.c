@@ -45,6 +45,7 @@ void DisplayGear(void);
 void DisplayDigital(void);
 
 void ProcessDistToDisplay();
+void ProcessTimeToDisplay();
 
 
 void Initial_LCD(void){
@@ -179,6 +180,7 @@ void LcdManager(void){
         DisplaySpeed();
         DisplayRPM();
         DisplayFuel();
+        ProcessTimeToDisplay();
         DisplayRTC();
         DisplayGear();
         DisplayDigital();
@@ -226,43 +228,113 @@ void DisplayFuel(void){
     LCD_X12 = fuel_cal%7<=0;
 }
 
+void ProcessTimeToDisplay(void)
+{
+    if (SET_CLOCK_MODE) // SET CLOCK MODE
+    {
+        DISPLAY5.vGLB = 1;
+        DISPLAY4.vGLB = HourBuf / 10;
+        DISPLAY3.vGLB = HourBuf % 10;
+        DISPLAY2.vGLB = MinBuf / 10;
+        DISPLAY1.vGLB = MinBuf % 10;
+        DISPLAY0.vGLB = 0;
+        if (TimeMode == TIME_HOUR)
+        {
+            if (Flash500msFlag == 0x00)
+            {
+                DISPLAY4.vGLB = 16;
+                DISPLAY3.vGLB = 16;
+            }
+        }
+        else if (TimeMode == TIME_MIN_TEN)
+        {
+            if (Flash500msFlag == 0x00)
+            {
+                DISPLAY2.vGLB = 16;
+            }
+        }
+        else if (TimeMode == TIME_MIN_UNIT)
+        {
+            if (Flash500msFlag == 0x00)
+            {
+                DISPLAY1.vGLB = 16;
+            }
+        }
+        else
+        {
+        }
+    }
+    else
+    {
+        if (Flash500msFlag)
+        {
+            DISPLAY5.vGLB = 1;
+        }
+        else
+        {
+            DISPLAY5.vGLB = 0;
+        }
+        DISPLAY4.vGLB = rtcHour / 10;
+        DISPLAY3.vGLB = rtcHour % 10;
+        DISPLAY2.vGLB = rtcMin / 10;
+        DISPLAY1.vGLB = rtcMin % 10;
+        DISPLAY0.vGLB = 0;
+    }
+
+    if (DISPLAY4.vGLB == 0x00)
+    {
+        DISPLAY4.vGLB = 16;
+    }
+    else
+    {
+        /* code */
+    }
+
+    DISPLAY4.vGLB = NumberAndWordTable[DISPLAY4.vGLB];
+    DISPLAY3.vGLB = NumberAndWordTable[DISPLAY3.vGLB];
+    DISPLAY2.vGLB = NumberAndWordTable[DISPLAY2.vGLB];
+    DISPLAY1.vGLB = NumberAndWordTable[DISPLAY1.vGLB];
+}
+
+
 void DisplayRTC(void){
-    hour_ten = NumberToWordTable[rtcHour/10];
-    hour_digit = NumberToWordTable[rtcHour%10];
-    min_ten = NumberToWordTable[rtcMin/10];
-    min_digit = NumberToWordTable[rtcMin%10];
 
-    LCD_11A = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->A);
-    LCD_11B = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->B);
-    LCD_11C = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->C);
-    LCD_11D = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->D);
-    LCD_11E = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->E);
-    //LCD_8F = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->F);
-    LCD_11G = (((DISPLAY_DIGITAL_TYPE *)&hour_ten)->G);
+    LCD_COL = DISPLAY5.bits.bit0;
+    //min digit
+    LCD_14A = DISPLAY1.bits.bit6;
+    LCD_14B = DISPLAY1.bits.bit5;
+    LCD_14C = DISPLAY1.bits.bit4;
+    LCD_14D = DISPLAY1.bits.bit3;
+    LCD_14E = DISPLAY1.bits.bit2;
+    LCD_14F = DISPLAY1.bits.bit1;
+    LCD_14G = DISPLAY1.bits.bit0;
 
-    LCD_12A = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->A);
-    LCD_12B = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->B);
-    LCD_12C = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->C);
-    LCD_12D = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->D);
-    LCD_12E = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->E);
-    LCD_12F = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->F);
-    LCD_12G = (((DISPLAY_DIGITAL_TYPE *)&hour_digit)->G);
+    //min ten
+    LCD_13A = DISPLAY2.bits.bit6;
+    LCD_13B = DISPLAY2.bits.bit5;
+    LCD_13C = DISPLAY2.bits.bit4;
+    LCD_13D = DISPLAY2.bits.bit3;
+    LCD_13E = DISPLAY2.bits.bit2;
+    LCD_13F = DISPLAY2.bits.bit1;
+    LCD_13G = DISPLAY2.bits.bit0;
 
-    LCD_13A = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->A);
-    LCD_13B = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->B);
-    LCD_13C = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->C);
-    LCD_13D = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->D);
-    LCD_13E = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->E);
-    LCD_13F = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->F);
-    LCD_13G = (((DISPLAY_DIGITAL_TYPE *)&min_ten)->G);
+    //hour digit
+    LCD_12A = DISPLAY3.bits.bit6;
+    LCD_12B = DISPLAY3.bits.bit5;
+    LCD_12C = DISPLAY3.bits.bit4;
+    LCD_12D = DISPLAY3.bits.bit3;
+    LCD_12E = DISPLAY3.bits.bit2;
+    LCD_12F = DISPLAY3.bits.bit1;
+    LCD_12G = DISPLAY3.bits.bit0;
 
-    LCD_14A = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->A);
-    LCD_14B = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->B);
-    LCD_14C = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->C);
-    LCD_14D = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->D);
-    LCD_14E = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->E);
-    LCD_14F = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->F);
-    LCD_14G = (((DISPLAY_DIGITAL_TYPE *)&min_digit)->G);
+    //hour ten
+    LCD_11A = DISPLAY4.bits.bit6;
+    LCD_11B = DISPLAY4.bits.bit5;
+    LCD_11C = DISPLAY4.bits.bit4;
+    LCD_11D = DISPLAY4.bits.bit3;
+    LCD_11E = DISPLAY4.bits.bit2;
+    //LCD_11F = DISPLAY4.bits.bit1;
+    LCD_11G = DISPLAY4.bits.bit0;
 }
 void DisplayGear(void){
     GEAR_num = NumberToWordTable[GEAR];

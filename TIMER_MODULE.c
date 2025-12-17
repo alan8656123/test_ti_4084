@@ -7,6 +7,7 @@ uint8_t rtcHour=12;
 uint8_t rtcMin=0;
 uint8_t rtcSec=0;
 uint32_t rtcSecCounter = 0;
+uint8_t HourBuf, MinBuf;
 
 //LCD
 bool lcdFlag =false;
@@ -15,6 +16,13 @@ bool lcdFlag =false;
 bool BUTTON_CYCLE_FLAG =false;
 uint8_t buttonCounter = 0;
 bool SET_CLOCK_MODE = 0;
+
+//seccounter
+uint8_t count500ms = 0;
+
+
+bool Flash500msFlag = 0;
+
 
 void delay(uint32_t times){
     delay_cycles(times*millisecond_cycle);
@@ -42,6 +50,10 @@ void TimerManager(void){
         if(++buttonCounter>=4){
             buttonCounter = 0;
             BUTTON_CYCLE_FLAG = true;
+        }
+        if(++count500ms>=100){
+            count500ms = 0;
+            Flash500msFlag = !Flash500msFlag;
         }
     }
 }
