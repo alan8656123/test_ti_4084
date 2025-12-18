@@ -26,4 +26,8 @@ extern uint16_t SpeedTimeOverBuf;
 extern bool SPEED_CYCLE_FLAG;
 extern bool AVEDISP_FLAG;
 extern volatile uint16_t TMR2H;
+
+
+//BAT
+extern bool BAT_CYCLE_FLAG;
 #endif

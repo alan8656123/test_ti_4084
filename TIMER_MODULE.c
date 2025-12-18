@@ -31,6 +31,8 @@ bool AVEDISP_FLAG =0;
 volatile uint16_t TMR2H=0;
 volatile bool TIMER65536_flag=0;
 
+//BAT
+bool BAT_CYCLE_FLAG = false;
 
 void delay(uint32_t times){
     delay_cycles(times*millisecond_cycle);
@@ -63,6 +65,7 @@ void TimerManager(void){
         if(++buttonCounter>=4){
             buttonCounter = 0;
             BUTTON_CYCLE_FLAG = true;
+            BAT_CYCLE_FLAG = true;
         }
         if(++speedcount>=20){//100ms
             speedcount = 0;
@@ -90,7 +93,7 @@ void TIMER_0_INST_IRQHandler(void)
 
 void TIMER_65536_INST_IRQHandler(void)
 {
-    switch (DL_TimerA_getPendingInterrupt(TIMER_65536_INST)) {
+    switch (DL_TimerG_getPendingInterrupt(TIMER_65536_INST)) {
         case DL_TIMER_IIDX_LOAD :
             TIMER65536_flag = 1;
             //TMR2H++;

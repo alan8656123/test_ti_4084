@@ -4,6 +4,7 @@
 #include "LCD_MODULE.h"
 #include "BUTTON_MODULE.h"
 #include "SPEED_MODULE.h"
+#include "BAT_MODULE.h"
 
 
 
@@ -24,16 +25,23 @@ int main(void)
 
 
     NVIC_EnableIRQ(TIMER_65536_INST_INT_IRQN);
-    DL_TimerA_startCounter(TIMER_65536_INST);
+    DL_TimerG_startCounter(TIMER_65536_INST);
+
+    NVIC_EnableIRQ(ADC12_0_INST_INT_IRQN);
+
 
     Initial_LCD();
     InitialLed();
     LCD_open_anime();  
     delay(1000);
+
+
+    InitialBat();
     while(1){
         TimerManager();
-        LcdManager();
         ButtonManager();
         SpeedManager();
+        BatManager();
+        LcdManager();
     }
 }

@@ -7,6 +7,7 @@
 #include "LCD_MODULE.h"
 #include "BUTTON_MODULE.h"
 #include "SPEED_MODULE.h"
+#include "BAT_MODULE.h"
 #include "TYPEDEF.h"
 
 enum {
@@ -26,7 +27,6 @@ static union GLB DISPLAY0,DISPLAY1,DISPLAY2,DISPLAY3,DISPLAY4,DISPLAY5,DISPLAY6;
 union LONG32 TRIPKM, TRIPMPH;
 union LONG32 ODOKM, ODOMPH;
 union LONG32 SERVICEKM, SERVICEMPH;
-uint32_t RealBatBuf = 130U;
 
 uint8_t display_digit;
 
