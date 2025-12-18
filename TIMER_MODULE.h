@@ -30,4 +30,7 @@ extern volatile uint16_t TMR2H;
 
 //BAT
 extern bool BAT_CYCLE_FLAG;
+
+//POWER
+extern bool POWER_CYCLE_FLAG;
 #endif

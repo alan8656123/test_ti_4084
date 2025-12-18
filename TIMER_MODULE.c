@@ -34,6 +34,9 @@ volatile bool TIMER65536_flag=0;
 //BAT
 bool BAT_CYCLE_FLAG = false;
 
+//Power
+bool POWER_CYCLE_FLAG = false;
+
 void delay(uint32_t times){
     delay_cycles(times*millisecond_cycle);
 }
@@ -48,6 +51,7 @@ void TimerManager(void){
         timerFlag = false;
         
         lcdFlag = true;     //5ms period == 200HZ
+        POWER_CYCLE_FLAG = true;
         
         /*if(timer_count++%200 == 0 ){ //1s
             DL_GPIO_togglePins(GPIO_LEDS_PORT,GPIO_LEDS_USER_LED_1_PIN );

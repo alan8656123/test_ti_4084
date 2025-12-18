@@ -8,6 +8,7 @@
 #include "BUTTON_MODULE.h"
 #include "SPEED_MODULE.h"
 #include "BAT_MODULE.h"
+#include "SYSTEM_MODULE.h"
 #include "TYPEDEF.h"
 
 enum {
@@ -72,10 +73,13 @@ void Initial_LCD(void){
     
 }
 
+static uint8_t LcdOpenMode=0;
+static uint8_t LCD_open_count =0;
 void LCD_open_anime(void){
-     for(uint8_t LcdOpenMode = 0U; LcdOpenMode<=22U;LcdOpenMode++)
-    {
-        if (LcdOpenMode == 0U)
+    if (++LCD_open_count>=10)
+    {   
+        LCD_open_count=0;
+        if (LcdOpenMode++ == 0U)
         {
             memset(Lcd_Data,0x00,40);
         }
@@ -182,7 +186,9 @@ void LCD_open_anime(void){
         {
             LCD_X40 = 1U;
         }
-        delay(50);
+        else if (LcdOpenMode >30U){
+            OPENING_FLAG=0;
+        }
         LCD_IC_DisplayWrite();
     }
 }
