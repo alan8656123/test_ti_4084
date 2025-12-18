@@ -208,7 +208,6 @@ void LcdManager(void){
            }
            else if (SwithDisplayFlag == DISPLAY_TURNSIGNAL)
            {   
-                DisplaySpeed();
                 DisplayRPM();
                 DisplayGear();
            }
@@ -278,7 +277,7 @@ void DisplaySpeed(void){
     //SPEED_KMH = DISPLAY3.bits.bit0; // KM
     //SPEED_KMH = DISPLAY3.bits.bit0; // KM
 
-    LCD_8A = DISPLAY2.bits.bit6; // DIG.6
+    LCD_8A = DISPLAY2.bits.bit6; 
     LCD_8B = DISPLAY2.bits.bit5;
     LCD_8C = DISPLAY2.bits.bit4;
     LCD_8D = DISPLAY2.bits.bit3;
@@ -286,7 +285,7 @@ void DisplaySpeed(void){
     //LCD_8F = DISPLAY2.bits.bit1;
     LCD_8G = DISPLAY2.bits.bit0;
 
-    LCD_9A = DISPLAY1.bits.bit6; // DIG.6
+    LCD_9A = DISPLAY1.bits.bit6;
     LCD_9B = DISPLAY1.bits.bit5;
     LCD_9C = DISPLAY1.bits.bit4;
     LCD_9D = DISPLAY1.bits.bit3;

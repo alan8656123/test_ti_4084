@@ -20,4 +20,10 @@ extern bool BUTTON_CYCLE_FLAG;
 //uint8_t buttonCounter = 0;
 extern bool SET_CLOCK_MODE;
 
+
+//SPEED
+extern uint16_t SpeedTimeOverBuf;
+extern bool SPEED_CYCLE_FLAG;
+extern bool AVEDISP_FLAG;
+extern volatile uint16_t TMR2H;
 #endif

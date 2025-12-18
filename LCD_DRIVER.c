@@ -36,8 +36,7 @@ void send(uint32_t I2C_TX_packet_size)
      /* Wait until the Controller sends all bytes */
      while ((gI2cControllerStatus != I2C_STATUS_TX_COMPLETE) &&
             (gI2cControllerStatus != I2C_STATUS_ERROR)) {
-                //delay_cycles(10);//make sure long enoungh;
-                __WFE();
+                //__WFE();
      }
 
      while (DL_I2C_getControllerStatus(I2C_INST) &

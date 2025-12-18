@@ -3,6 +3,7 @@
 #include "LED_MODULE.h"
 #include "LCD_MODULE.h"
 #include "BUTTON_MODULE.h"
+#include "SPEED_MODULE.h"
 
 
 
@@ -18,14 +19,21 @@ int main(void)
 
     DL_RTC_enableClockControl(RTC);
 
+    
+    NVIC_EnableIRQ(GPIO_SPEED_IN_INT_IRQN);
+
+
+    NVIC_EnableIRQ(TIMER_65536_INST_INT_IRQN);
+    DL_TimerA_startCounter(TIMER_65536_INST);
+
     Initial_LCD();
     InitialLed();
     LCD_open_anime();  
     delay(1000);
     while(1){
-        LcdManager();
         TimerManager();
+        LcdManager();
         ButtonManager();
+        SpeedManager();
     }
 }
-

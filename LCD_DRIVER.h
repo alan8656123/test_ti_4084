@@ -19,14 +19,14 @@ uint8_t gTxPacket[64] ;
 
 
 /* Counters for TX length and bytes sent */
-uint32_t gTxLen, gTxCount;
+volatile uint32_t gTxLen, gTxCount;
 
 /* Data received from Target */
 uint8_t gRxPacket[I2C_RX_MAX_PACKET_SIZE];
 /* Counters for TX length and bytes sent */
 uint32_t gRxLen, gRxCount;
 /* Indicates status of I2C */
-static enum I2cControllerStatus {
+volatile static enum I2cControllerStatus {
     I2C_STATUS_IDLE = 0,
     I2C_STATUS_TX_STARTED,
     I2C_STATUS_TX_INPROGRESS,
