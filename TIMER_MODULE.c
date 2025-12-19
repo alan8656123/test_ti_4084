@@ -37,10 +37,6 @@ bool BAT_CYCLE_FLAG = false;
 //Power
 bool POWER_CYCLE_FLAG = false;
 
-void delay(uint32_t times){
-    delay_cycles(times*millisecond_cycle);
-}
-
 void TimerManager(void){
     if(TIMER65536_flag){
         TIMER65536_flag = false;

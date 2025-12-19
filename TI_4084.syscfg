@@ -37,20 +37,35 @@ const TIMER2 = TIMER.addInstance();
 const mux4       = system.clockTree["EXHFMUX"];
 mux4.inputSelect = "EXHFMUX_XTAL";
 
-const pinFunction3                         = system.clockTree["HFCLKEXT"];
-pinFunction3.enable                        = true;
-pinFunction3.inputFreq                     = 8;
-pinFunction3.peripheral.hfclkInPin.$assign = "PA6";
+const mux5       = system.clockTree["EXLFMUX"];
+mux5.inputSelect = "EXLFMUX_XTAL";
 
-const pinFunction4     = system.clockTree["HFXT"];
-pinFunction4.inputFreq = 8;
+const mux8       = system.clockTree["HSCLKMUX"];
+mux8.inputSelect = "HSCLKMUX_HFCLK";
+
+const mux9       = system.clockTree["LFXTMUX"];
+mux9.inputSelect = "LFXTMUX_TRUE";
+
+const pinFunction3     = system.clockTree["HFCLKEXT"];
+pinFunction3.inputFreq = 8;
+
+const pinFunction4                        = system.clockTree["HFXT"];
+pinFunction4.inputFreq                    = 8;
+pinFunction4.enable                       = true;
+pinFunction4.HFXTStartup                  = 255;
+pinFunction4.peripheral.$assign           = "SYSCTL";
+pinFunction4.peripheral.hfxInPin.$assign  = "PA5";
+pinFunction4.peripheral.hfxOutPin.$assign = "PA6";
 
 const pinFunction5     = system.clockTree["LFCLKEXT"];
 pinFunction5.inputFreq = 32.768;
-pinFunction5.enable    = true;
 
-const pinFunction6     = system.clockTree["LFXT"];
-pinFunction6.inputFreq = 32.768;
+const pinFunction6                        = system.clockTree["LFXT"];
+pinFunction6.inputFreq                    = 32.768;
+pinFunction6.enable                       = true;
+pinFunction6.peripheral.$assign           = "SYSCTL";
+pinFunction6.peripheral.lfxInPin.$assign  = "PA3";
+pinFunction6.peripheral.lfxOutPin.$assign = "PA4";
 
 ADC121.$name                      = "ADC12_0";
 ADC121.sampClkSrc                 = "DL_ADC12_CLOCK_ULPCLK";
@@ -161,6 +176,7 @@ RTC.calHour = 12;
 SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.clockTreeEn           = true;
 SYSCTL.powerPolicy           = "STANDBY0";
+SYSCTL.HFXTStartup           = 255;
 
 TIMER1.$name              = "TIMER_0";
 TIMER1.timerMode          = "PERIODIC";
@@ -170,13 +186,13 @@ TIMER1.timerClkPrescale   = 8;
 TIMER1.timerClkDiv        = 8;
 TIMER1.peripheral.$assign = "TIMG0";
 
-TIMER2.timerClkPrescale   = 8;
 TIMER2.$name              = "TIMER_65536";
-TIMER2.timerClkDiv        = 4;
 TIMER2.timerMode          = "PERIODIC";
 TIMER2.interruptPriority  = "0";
 TIMER2.interrupts         = ["LOAD"];
 TIMER2.timerPeriod        = "65536us";
+TIMER2.timerClkDiv        = 4;
+TIMER2.timerClkPrescale   = 2;
 TIMER2.peripheral.$assign = "TIMG6";
 
 /**
@@ -184,20 +200,17 @@ TIMER2.peripheral.$assign = "TIMG6";
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
  * re-solve from scratch.
  */
-pinFunction3.peripheral.$suggestSolution            = "SYSCTL";
-pinFunction5.peripheral.$suggestSolution            = "SYSCTL";
-pinFunction5.peripheral.lfclkInPin.$suggestSolution = "PA4";
-Board.peripheral.$suggestSolution                   = "DEBUGSS";
-Board.peripheral.swclkPin.$suggestSolution          = "PA20";
-Board.peripheral.swdioPin.$suggestSolution          = "PA19";
-GPIO1.associatedPins[0].pin.$suggestSolution        = "PA8";
-GPIO2.associatedPins[0].pin.$suggestSolution        = "PB0";
-GPIO3.associatedPins[0].pin.$suggestSolution        = "PB1";
-GPIO4.associatedPins[0].pin.$suggestSolution        = "PA9";
-GPIO5.associatedPins[0].pin.$suggestSolution        = "PA21";
-GPIO6.associatedPins[0].pin.$suggestSolution        = "PB22";
-GPIO7.associatedPins[0].pin.$suggestSolution        = "PB21";
-GPIO8.associatedPins[0].pin.$suggestSolution        = "PB20";
-GPIO9.associatedPins[0].pin.$suggestSolution        = "PA22";
-GPIO10.associatedPins[0].pin.$suggestSolution       = "PB11";
-RTC.peripheral.$suggestSolution                     = "RTC";
+Board.peripheral.$suggestSolution             = "DEBUGSS";
+Board.peripheral.swclkPin.$suggestSolution    = "PA20";
+Board.peripheral.swdioPin.$suggestSolution    = "PA19";
+GPIO1.associatedPins[0].pin.$suggestSolution  = "PA8";
+GPIO2.associatedPins[0].pin.$suggestSolution  = "PB0";
+GPIO3.associatedPins[0].pin.$suggestSolution  = "PB1";
+GPIO4.associatedPins[0].pin.$suggestSolution  = "PA9";
+GPIO5.associatedPins[0].pin.$suggestSolution  = "PA21";
+GPIO6.associatedPins[0].pin.$suggestSolution  = "PB22";
+GPIO7.associatedPins[0].pin.$suggestSolution  = "PB21";
+GPIO8.associatedPins[0].pin.$suggestSolution  = "PB20";
+GPIO9.associatedPins[0].pin.$suggestSolution  = "PA22";
+GPIO10.associatedPins[0].pin.$suggestSolution = "PB11";
+RTC.peripheral.$suggestSolution               = "RTC";

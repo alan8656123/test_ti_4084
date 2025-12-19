@@ -65,12 +65,7 @@ void ProcessTimeToDisplay();
 
 
 void Initial_LCD(void){
-    //delay to prevent i2c not up to 3.3V
-    delay(200);
     LCD_IC_DisplayOn();
-    // all light////////////////////////////////////////////////
-    delay(50);
-    
 }
 
 static uint8_t LcdOpenMode=0;
