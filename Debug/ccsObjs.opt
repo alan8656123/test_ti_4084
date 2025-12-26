@@ -1,0 +1,16 @@
+"./BAT_MODULE.o"
+"./BUTTON_MODULE.o"
+"./LCD_DRIVER.o"
+"./LCD_MODULE.o"
+"./LED_MODULE.o"
+"./Main.o"
+"./SPEED_MODULE.o"
+"./SYSTEM_MODULE.o"
+"./TIMER_MODULE.o"
+"./ti_msp_dl_config.o"
+"./startup_mspm0g350x_ticlang.o"
+"./TYPEDEF.o"
+"./Uci8533.o"
+-l"./device_linker.cmd"
+-ldevice.cmd.genlibs
+-llibc.a
