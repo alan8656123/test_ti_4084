@@ -3,7 +3,7 @@
    <banner>TI ARM Clang Linker Unix v4.0.4.LTS</banner>
    <copyright>Copyright (c) 1996-2018 Texas Instruments Incorporated</copyright>
    <command_line>/home/alan8656/ti/ccs2040/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmlnk -I/home/alan8656/ti/ccs2040/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/lib -o ti_test.out -mti_test.map -i/home/alan8656/ti/mspm0_sdk_2_08_00_03/source -i/home/alan8656/workspace_ccstheia/ti_test -i/home/alan8656/workspace_ccstheia/ti_test/Debug/syscfg -i/home/alan8656/ti/ccs2040/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/lib --diag_wrap=off --display_error_number --warn_sections --xml_link_info=ti_test_linkInfo.xml --rom_model ./BAT_MODULE.o ./BUTTON_MODULE.o ./LCD_DRIVER.o ./LCD_MODULE.o ./LED_MODULE.o ./Main.o ./SPEED_MODULE.o ./SYSTEM_MODULE.o ./TIMER_MODULE.o ./ti_msp_dl_config.o ./startup_mspm0g350x_ticlang.o ./TYPEDEF.o ./Uci8533.o -l./device_linker.cmd -ldevice.cmd.genlibs -llibc.a --start-group -llibc++.a -llibc++abi.a -llibc.a -llibsys.a -llibsysbm.a -llibclang_rt.builtins.a -llibclang_rt.profile.a --end-group --cg_opt_level=2</command_line>
-   <link_time>0x694e37dc</link_time>
+   <link_time>0x69548a9a</link_time>
    <link_errors>0x0</link_errors>
    <output_file>/home/alan8656/workspace_ccstheia/ti_test/Debug/ti_test.out</output_file>
    <entry_point>
